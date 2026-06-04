@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
@@ -12,6 +13,8 @@ interface NavbarProps {
 
 export function Navbar({ className }: NavbarProps) {
   const { connected, publicKey } = useWallet();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   return (
     <nav
@@ -38,23 +41,18 @@ export function Navbar({ className }: NavbarProps) {
             </span>
           </Link>
 
-          {/* Nav links */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="btn-ghost text-label-md"
-              >
+              <Link key={link.href} href={link.href} className="btn-ghost text-label-md">
                 {link.label}
               </Link>
             ))}
           </div>
         </div>
 
-        {/* Right side */}
+        {/* Right side — wallet UI only rendered after mount to prevent SSR mismatch */}
         <div className="flex items-center gap-3">
-          {connected && publicKey && (
+          {mounted && connected && publicKey && (
             <div className="hidden sm:flex items-center gap-2 bg-[#f4f3fb] border border-[#e8e7ef] rounded-full px-3 py-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-[#007d51] shadow-[0_0_4px_rgba(0,125,81,0.6)]" />
               <span className="text-[12px] font-mono font-medium text-[#484556]">
@@ -62,19 +60,31 @@ export function Navbar({ className }: NavbarProps) {
               </span>
             </div>
           )}
-          <WalletMultiButton
-            style={{
-              background: "linear-gradient(135deg, #6d4aff 0%, #4f46e5 100%)",
-              borderRadius: "16px",
-              height: "40px",
-              fontSize: "14px",
-              fontWeight: "600",
-              fontFamily: "Inter, sans-serif",
-              boxShadow: "0 4px 16px rgba(109, 74, 255, 0.28)",
-              padding: "0 20px",
-              border: "none",
-            }}
-          />
+          {mounted ? (
+            <WalletMultiButton
+              style={{
+                background: "linear-gradient(135deg, #6d4aff 0%, #4f46e5 100%)",
+                borderRadius: "16px",
+                height: "40px",
+                fontSize: "14px",
+                fontWeight: "600",
+                fontFamily: "Inter, sans-serif",
+                boxShadow: "0 4px 16px rgba(109, 74, 255, 0.28)",
+                padding: "0 20px",
+                border: "none",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                background: "linear-gradient(135deg, #6d4aff 0%, #4f46e5 100%)",
+                borderRadius: "16px",
+                height: "40px",
+                width: "152px",
+                boxShadow: "0 4px 16px rgba(109, 74, 255, 0.28)",
+              }}
+            />
+          )}
         </div>
       </div>
     </nav>
@@ -84,6 +94,5 @@ export function Navbar({ className }: NavbarProps) {
 const navLinks = [
   { href: "/merchant/dashboard", label: "Merchant" },
   { href: "/consumer/dashboard", label: "Consumer" },
-  { href: "/checkout", label: "Checkout" },
   { href: "/docs", label: "Docs" },
 ];

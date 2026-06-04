@@ -1,4 +1,5 @@
-import { Navbar } from "@/components/layout";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { AuthGuard } from "@/features/auth";
 
 export default function MerchantLayout({
   children,
@@ -6,9 +7,8 @@ export default function MerchantLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#faf8ff]">
-      <Navbar />
-      <div className="page-container py-10">{children}</div>
-    </div>
+    <AuthGuard requiredRole="merchant">
+      <DashboardLayout>{children}</DashboardLayout>
+    </AuthGuard>
   );
 }
