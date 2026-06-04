@@ -66,12 +66,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { publicKey, connected, connecting, signMessage, disconnect } =
     useWallet();
 
+  const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<WalletUser | null>(null);
   const [step, setStep] = useState<AuthStep>("idle");
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const walletAddress = publicKey?.toBase58() ?? null;
+  useEffect(() => { setMounted(true); }, []);
+
+  const realWalletAddress = publicKey?.toBase58() ?? null;
+  const walletAddress = mounted ? realWalletAddress : null;
 
   useEffect(() => {
     if (!walletAddress) {
@@ -99,12 +103,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [walletAddress]);
 
   useEffect(() => {
+    if (!mounted) return;
     if (!connected && !connecting) {
       setUser(null);
       setStep("idle");
       clearSession();
     }
-  }, [connected, connecting]);
+  }, [mounted, connected, connecting]);
 
   const signIn = useCallback(async () => {
     if (!publicKey || !signMessage || !walletAddress) {
