@@ -1,0 +1,332 @@
+PHASE 1 — WALLET AUTHENTICATION & DASHBOARD FOUNDATION
+
+First:
+
+* Pull the latest state from GitHub.
+* Confirm GitHub sync is active.
+* Continue from Phase 0.
+* Continue using the existing Velora Design System.
+* Use Solana Devnet only.
+* Do not expose secrets, API keys, private keys, or wallet seed phrases.
+
+DO NOT BUILD:
+
+* Payment Links
+* Checkout Payments
+* Subscriptions
+* Analytics
+* Merchant Products
+* Merchant Storefront
+* Transaction Processing
+* Helius Webhooks
+
+PHASE 1 OBJECTIVE
+
+Build the authentication layer and dashboard foundations that all future phases will depend on.
+
+========================================
+DESIGN DIRECTION
+================
+
+Design this product as if it were being built by a Senior Product Designer at Stripe, Linear, Coinbase, Notion, or Vercel.
+
+The design should feel:
+
+* Premium
+* Modern
+* Intentional
+* Calm
+* Extremely clean
+* Enterprise-ready
+* Investor-demo ready
+
+Avoid:
+
+* Generic dashboard templates
+* Heavy shadows
+* Overly colorful interfaces
+* Large decorative illustrations
+* Cluttered layouts
+* Excessive gradients
+
+Prioritize:
+
+* Clear hierarchy
+* Breathing space
+* Excellent typography
+* Fast comprehension
+* Accessibility
+* Responsive design
+* User confidence
+
+========================================
+USER EXPERIENCE REQUIREMENTS
+============================
+
+Every screen should answer:
+
+1. Where am I?
+2. What can I do?
+3. What should I do next?
+
+Reduce cognitive load.
+
+Use progressive disclosure.
+
+Only show information relevant to the current stage of the journey.
+
+Empty states should feel useful and guide users toward their next action.
+
+========================================
+ANIMATION & INTERACTION DESIGN
+==============================
+
+Add tasteful micro-interactions.
+
+Examples:
+
+* Wallet connect button hover animation
+* Smooth page transitions
+* Card hover elevation
+* Loading skeleton states
+* Fade-in dashboard content
+* Animated success states
+* Animated role selection cards
+
+Animation style:
+
+* Fast
+* Smooth
+* Professional
+
+Avoid:
+
+* Bouncy animations
+* Excessive motion
+* Marketing-style effects
+
+Target:
+
+* 150ms–250ms interaction timing
+* Framer Motion where appropriate
+
+The product should feel alive but never distracting.
+
+========================================
+AUTHENTICATION
+==============
+
+Build:
+
+1. Solana Wallet Adapter
+2. Phantom Wallet Support
+3. Wallet Connect Flow
+4. Wallet Disconnect Flow
+5. Wallet State Management
+6. Sign Message Authentication
+7. Signature Verification
+8. Session Persistence
+
+Authentication Flow:
+
+Connect Wallet
+↓
+Sign Message
+↓
+Verify Signature
+↓
+Create User Record
+↓
+Choose Role
+↓
+Enter Dashboard
+
+========================================
+ROLE SELECTION
+==============
+
+After authentication:
+
+Present a beautiful role selection screen.
+
+Two cards:
+
+Merchant
+Consumer
+
+Merchant Card:
+
+* Receive Payments
+* Manage Customers
+* Create Payment Experiences
+
+Consumer Card:
+
+* Manage Receipts
+* View Purchases
+* Manage Subscriptions
+
+Requirements:
+
+* Large clickable cards
+* Hover states
+* Selected state
+* Smooth transitions
+
+Store role selection in Supabase.
+
+========================================
+SUPABASE
+========
+
+Create or prepare:
+
+users
+wallets
+merchants
+consumers
+
+Store:
+
+* wallet address
+* role
+* created_at
+* last_login
+
+Create user automatically on first sign-in.
+
+========================================
+MERCHANT DASHBOARD FOUNDATION
+=============================
+
+Create dashboard shell only.
+
+Sections:
+
+Header
+
+* Merchant identity
+* Wallet status
+* Network badge
+
+Overview Card
+
+* Wallet connected
+* Ready to receive payments
+
+Empty Payment Links Section
+
+* Placeholder state
+
+Empty Transactions Section
+
+* Placeholder state
+
+Future Features Preview
+
+* Payment Links
+* Subscriptions
+* Checkout SDK
+
+Everything should feel polished despite having no real data.
+
+========================================
+CONSUMER DASHBOARD FOUNDATION
+=============================
+
+Create dashboard shell only.
+
+Sections:
+
+Header
+
+* Consumer identity
+* Wallet status
+
+Connected Apps
+
+* Empty state
+
+Receipts
+
+* Empty state
+
+Subscriptions
+
+* Empty state
+
+Recent Activity
+
+* Empty state
+
+Future Features Preview
+
+The experience should feel useful even before transactions exist.
+
+========================================
+RESPONSIVENESS
+==============
+
+Support:
+
+Desktop
+Tablet
+Mobile
+
+Mobile experience must feel first-class.
+
+Navigation should adapt gracefully.
+
+No horizontal scrolling.
+
+========================================
+QUALITY REQUIREMENTS
+====================
+
+Use:
+
+* Next.js App Router
+* TypeScript
+* TailwindCSS
+* shadcn/ui
+
+Requirements:
+
+* Zero TypeScript errors
+* Modular architecture
+* Reusable components
+* Proper loading states
+* Proper error states
+* Accessibility support
+* Clean folder structure
+
+========================================
+TESTING
+=======
+
+Before completion:
+
+* Test wallet connect
+* Test wallet disconnect
+* Test message signing
+* Test role selection
+* Test Supabase user creation
+* Test dashboard routing
+* Test session persistence
+* Test mobile responsiveness
+
+========================================
+GITHUB
+======
+
+When complete:
+
+Commit:
+
+feat: phase 1 wallet authentication and dashboard foundation
+
+Push to GitHub.
+
+Stop and wait for Phase 2 instructions.
+
+Do not build anything outside the scope of Phase 1.

@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Clock,
 } from "lucide-react";
-import type { Metadata } from "next";
 import { useAuthContext } from "@/features/auth";
 import { shortenAddress } from "@/lib/solana/config";
 import { useWalletBalance } from "@/features/wallet";

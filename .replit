@@ -9,28 +9,6 @@ args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
 
 [workflows]
-runButton = "Project"
-
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Velora: Next.js Dev Server"
-
-[[workflows.workflow]]
-name = "Velora: Next.js Dev Server"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd velora && pnpm dev"
-waitForPort = 3000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -46,12 +24,20 @@ localPort = 3000
 externalPort = 3000
 
 [[ports]]
+localPort = 8000
+externalPort = 8000
+
+[[ports]]
 localPort = 8080
 externalPort = 80
 
 [[ports]]
 localPort = 8081
 externalPort = 8081
+
+[[ports]]
+localPort = 8082
+externalPort = 3001
 
 [nix]
 channel = "stable-25_05"
