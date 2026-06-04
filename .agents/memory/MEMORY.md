@@ -1,0 +1,1 @@
+- [Velora project structure](velora-project.md) — Next.js 15 app lives in `velora/` (not artifacts/), phase-based build, wallet-native identity

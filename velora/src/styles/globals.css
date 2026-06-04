@@ -1,0 +1,427 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Velora Design System — Global Styles
+   Source of truth: attached DESIGN.md
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #faf8ff;
+    color: #1a1b21;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  body {
+    background-color: #faf8ff;
+    color: #1a1b21;
+    min-height: 100vh;
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: rgba(109, 74, 255, 0.15);
+    color: #1a1b21;
+  }
+
+  /* Scrollbar — minimal and on-brand */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #c9c4d9;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #797588;
+  }
+
+  /* Tabular nums for financial data */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+
+  /* ─── Layout ─── */
+  .page-container {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  @media (min-width: 768px) {
+    .page-container {
+      padding-left: 48px;
+      padding-right: 48px;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .page-container {
+      padding-left: 80px;
+      padding-right: 80px;
+    }
+  }
+
+  /* ─── Typography ─── */
+  .text-display {
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .text-headline-lg {
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .text-headline-md {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .text-body-lg {
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .text-body-md {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .text-label-md {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .text-label-sm {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+
+  @media (max-width: 768px) {
+    .text-headline-lg {
+      font-size: 24px;
+    }
+    .text-display {
+      font-size: 40px;
+    }
+  }
+
+  /* ─── Gradient Text ─── */
+  .velora-gradient-text {
+    background: linear-gradient(135deg, #6d4aff 0%, #4f46e5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── Cards ─── */
+  /* Primary card: white, 24px radius, soft tinted shadow */
+  .velora-card {
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px solid #e8e7ef;
+    box-shadow: 0 4px 20px rgba(11, 16, 38, 0.04);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .velora-card:hover {
+    box-shadow: 0 8px 32px rgba(11, 16, 38, 0.07), 0 2px 8px rgba(11, 16, 38, 0.04);
+    transform: translateY(-2px);
+  }
+
+  /* Glass card: used for floating elements, nav, sidebars */
+  .velora-card-glass {
+    background: rgba(255, 255, 255, 0.80);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.50);
+    box-shadow: 0 8px 32px rgba(84, 39, 230, 0.08), 0 2px 8px rgba(11, 16, 38, 0.04);
+  }
+
+  /* ─── Buttons ─── */
+  /* Primary: gradient fill, 16px radius, 48px height */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 24px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #6d4aff 0%, #4f46e5 100%);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(109, 74, 255, 0.30);
+    transition: opacity 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.92;
+    box-shadow: 0 8px 40px rgba(109, 74, 255, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    opacity: 0.85;
+    transform: translateY(0);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Large CTA button: 56px height */
+  .btn-primary-lg {
+    height: 56px;
+    padding: 0 32px;
+    font-size: 18px;
+  }
+
+  /* Secondary: white fill, 1px border, navy text */
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 24px;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #1a1b21;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
+    border: 1px solid #e7e4ff;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(11, 16, 38, 0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease, background 0.15s ease;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .btn-secondary:hover {
+    border-color: #c9bfff;
+    box-shadow: 0 4px 16px rgba(11, 16, 38, 0.07);
+    transform: translateY(-1px);
+    background: #faf8ff;
+  }
+
+  .btn-secondary:active {
+    transform: translateY(0);
+  }
+
+  .btn-secondary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Ghost / icon button */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    background: transparent;
+    color: #484556;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    text-decoration: none;
+  }
+
+  .btn-ghost:hover {
+    background: #eeedf5;
+    color: #1a1b21;
+  }
+
+  /* ─── Inputs ─── */
+  .velora-input {
+    height: 48px;
+    width: 100%;
+    padding: 0 16px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid #c9c4d9;
+    color: #1a1b21;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .velora-input::placeholder {
+    color: #797588;
+  }
+
+  .velora-input:focus {
+    border-color: #5427e6;
+    box-shadow: 0 0 0 4px rgba(84, 39, 230, 0.12);
+  }
+
+  /* ─── Status Chips ─── */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+  }
+
+  .chip-success {
+    background: rgba(0, 98, 62, 0.10);
+    color: #00623e;
+  }
+
+  .chip-warning {
+    background: rgba(245, 158, 11, 0.10);
+    color: #b45309;
+  }
+
+  .chip-error {
+    background: rgba(186, 26, 26, 0.10);
+    color: #ba1a1a;
+  }
+
+  .chip-neutral {
+    background: #eeedf5;
+    color: #484556;
+  }
+
+  .chip-primary {
+    background: rgba(84, 39, 230, 0.10);
+    color: #5427e6;
+  }
+
+  /* ─── Transaction Row ─── */
+  .tx-row {
+    display: flex;
+    align-items: center;
+    height: 72px;
+    padding: 0 16px;
+    border-bottom: 1px solid #eeedf5;
+    transition: background 0.15s ease;
+  }
+
+  .tx-row:last-child {
+    border-bottom: none;
+  }
+
+  .tx-row:hover {
+    background: #f4f3fb;
+  }
+
+  .tx-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(84, 39, 230, 0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ─── Section / Stat Cards ─── */
+  .stat-card {
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px solid #e8e7ef;
+    box-shadow: 0 4px 20px rgba(11, 16, 38, 0.04);
+    padding: 24px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #797588;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #1a1b21;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+
+  /* ─── Dividers ─── */
+  .velora-divider {
+    height: 1px;
+    background: #e8e7ef;
+    border: none;
+    margin: 0;
+  }
+
+  /* ─── Ambient glow background accents ─── */
+  .glow-accent {
+    position: absolute;
+    border-radius: 9999px;
+    pointer-events: none;
+    background: radial-gradient(ellipse, rgba(109, 74, 255, 0.15) 0%, transparent 70%);
+  }
+}
+
+@layer utilities {
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
