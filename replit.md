@@ -61,7 +61,6 @@ Velora is a wallet-native commerce platform for Solana with:
 ## Gotchas
 
 - Next.js app lives in `velora/` (not in `artifacts/`) — it is a standalone workspace package
-- Replit preview for Velora is a **routing-only pointer artifact** at `artifacts/velora/.replit-artifact/artifact.toml` (no `package.json`, so pnpm ignores it). It reuses artifact id `Ti9OJlxlcf65D6qijweAZ` and runs the real app via `pnpm --filter @workspace/velora run dev`. The router only discovers artifacts under `artifacts/*`, so this pointer is what makes `/` route to Velora. Do not reintroduce `velora/.replit-artifact`.
 - Run `cd velora && pnpm typecheck` not `pnpm --filter @workspace/velora run typecheck` (both work but former is clearer)
 - Wallet sign-in (challenge/signature) is Phase 1 — Phase 0 has the hook interface only
 - `@solana/wallet-adapter-backpack` is listed as a dependency but not yet added to WalletProvider — add it in Phase 1 when Backpack wallet import is stable

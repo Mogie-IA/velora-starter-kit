@@ -43,7 +43,6 @@ export interface Database {
           is_merchant?: boolean;
           metadata?: Json | null;
         };
-        Relationships: [];
       };
       wallets: {
         Row: {
@@ -76,15 +75,6 @@ export interface Database {
           last_connected_at?: string | null;
           metadata?: Json | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "wallets_user_id_fkey";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-        ];
       };
       merchants: {
         Row: {
@@ -129,56 +119,6 @@ export interface Database {
           is_active?: boolean;
           metadata?: Json | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "merchants_user_id_fkey";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      consumers: {
-        Row: {
-          id: string;
-          created_at: string;
-          updated_at: string;
-          user_id: string;
-          wallet_address: string;
-          display_name: string | null;
-          is_active: boolean;
-          metadata: Json | null;
-        };
-        Insert: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          user_id: string;
-          wallet_address: string;
-          display_name?: string | null;
-          is_active?: boolean;
-          metadata?: Json | null;
-        };
-        Update: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          user_id?: string;
-          wallet_address?: string;
-          display_name?: string | null;
-          is_active?: boolean;
-          metadata?: Json | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "consumers_user_id_fkey";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-        ];
       };
       products: {
         Row: {
@@ -223,15 +163,6 @@ export interface Database {
           product_type?: "one_time" | "subscription";
           metadata?: Json | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "products_merchant_id_fkey";
-            columns: ["merchant_id"];
-            isOneToOne: false;
-            referencedRelation: "merchants";
-            referencedColumns: ["id"];
-          },
-        ];
       };
       transactions: {
         Row: {
@@ -285,15 +216,6 @@ export interface Database {
           slot?: number | null;
           metadata?: Json | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "transactions_merchant_id_fkey";
-            columns: ["merchant_id"];
-            isOneToOne: false;
-            referencedRelation: "merchants";
-            referencedColumns: ["id"];
-          },
-        ];
       };
       subscriptions: {
         Row: {
@@ -350,32 +272,16 @@ export interface Database {
           cancelled_at?: string | null;
           metadata?: Json | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_merchant_id_fkey";
-            columns: ["merchant_id"];
-            isOneToOne: false;
-            referencedRelation: "merchants";
-            referencedColumns: ["id"];
-          },
-        ];
       };
     };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
-    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
     Enums: {
       transaction_status: "pending" | "confirmed" | "failed" | "refunded";
       transaction_type: "payment" | "subscription" | "refund";
       subscription_status: "active" | "paused" | "cancelled" | "expired";
       subscription_interval: "daily" | "weekly" | "monthly" | "yearly";
       product_type: "one_time" | "subscription";
-    };
-    CompositeTypes: {
-      [_ in never]: never;
     };
   };
 }
