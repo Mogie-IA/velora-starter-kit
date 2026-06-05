@@ -1,6 +1,8 @@
 - [Velora project structure](velora-project.md) — Next.js 15 app lives in `velora/` (not artifacts/), phase-based build, wallet-native identity
 - [Supabase type quirks](supabase-type-quirks.md) — @supabase/supabase-js v2.107+ requires Relationships[], CompositeTypes, and [_ in never]: never for Views/Functions; use createServiceClient (direct) not createAdminClient (SSR) in server actions
 - [Wallet adapter SSR fix](wallet-adapter-ssr.md) — WalletMultiButton and useWallet() state cause hydration mismatch; guard with mounted state before rendering any wallet-dependent UI
+- [Zod URL scheme validation](zod-url-scheme.md) — z.string().url() accepts javascript:/data:; restrict to http(s) via .refine before rendering as href/src
+- [Solana tx verification timing](solana-tx-verification.md) — getTransaction lags confirmation; verify in two phases (getSignatureStatuses then getTransaction) or you false-report PAYMENT_PENDING; submitPayment idempotency keys on tx_signature before link gates
 - [GitHub push script hazard](github-push-script.md) — pushes go via GitHub API (no git remote); running the push from scripts/ cwd truncates the whole repo. Run git ls-files from repo root
 - [Supabase DDL from Replit](supabase-ddl-from-replit.md) — Replit can't reach Supabase Postgres for DDL; use SQL Editor; must explicitly grant service_role or get 42501
 - [Replit preview pointer artifact](replit-preview-pointer-artifact.md) — app outside artifacts/ gets no preview route; add routing-only pointer toml under artifacts/<slug> (no package.json), reuse id, no restart needed

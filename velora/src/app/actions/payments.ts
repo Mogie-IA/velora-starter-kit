@@ -195,68 +195,111 @@ export async function submitPayment(
     return { ok: false, error: "Payment link not found.", code: "NOT_FOUND" };
   }
 
-  const eff = effectiveStatus(link);
-  if (eff === "paid") {
-    return {
-      ok: false,
-      error: "This payment link has already been paid.",
-      code: "VALIDATION",
-    };
-  }
-  if (eff !== "active") {
-    return {
-      ok: false,
-      error: `This payment link is ${eff} and cannot accept payments.`,
-      code: "VALIDATION",
-    };
-  }
-  if (link.currency !== "SOL") {
-    return {
-      ok: false,
-      error: "Only SOL payments are supported on Devnet right now.",
-      code: "VALIDATION",
-    };
-  }
-
   const amount = Number(link.amount);
   const amountLamports = solToLamports(amount);
 
-  // 0) Reject a signature that has already been recorded (replay/double-submit).
+  console.log(
+    `[velora] submitPayment slug=${input.slug} sig=${input.txSignature.slice(0, 12)}… payer=${input.payerWallet.slice(0, 6)}… amount=${amount} ${link.currency}`
+  );
+
+  // 0) Look up any existing payment for this signature FIRST, before the
+  // link-status gates. A signature that was already settled must be handled
+  // idempotently even though the link is now "paid" — otherwise a retry would
+  // hit the "already paid" gate instead of returning the existing receipt.
   // There is no DB unique constraint (no schema change in this phase), so this
-  // precheck is the guard; it makes replaying a prior signature a no-op.
-  const dupRes = await supabase
+  // lookup is also the replay/double-submit guard:
+  //  - confirmed → return the existing receipt (safe to call repeatedly)
+  //  - failed    → surface the failure
+  //  - pending   → RESUME verification on the same row (makes a retry after
+  //                PAYMENT_PENDING work without sending new funds)
+  const existingRes = await supabase
     .from("payments")
-    .select("id")
+    .select("*")
     .eq("tx_signature", input.txSignature)
     .maybeSingle();
 
-  if (dupRes.error) return dbError<PaymentReceipt>(dupRes.error);
-  if (dupRes.data) {
-    return {
-      ok: false,
-      error: "This transaction has already been submitted.",
-      code: "VALIDATION",
-    };
+  if (existingRes.error) return dbError<PaymentReceipt>(existingRes.error);
+
+  let payment: Payment;
+  if (existingRes.data) {
+    const existing = existingRes.data as Payment;
+    // Scope the signature to THIS link + payer. A signature recorded against a
+    // different link or wallet must never be reused/mutated through this call.
+    if (
+      existing.payment_link_id !== link.id ||
+      existing.payer_wallet !== input.payerWallet
+    ) {
+      return {
+        ok: false,
+        error: "This transaction does not belong to this payment.",
+        code: "VALIDATION",
+      };
+    }
+    if (existing.status === "confirmed") {
+      console.log(
+        `[velora] submitPayment idempotent hit — already confirmed sig=${input.txSignature.slice(0, 12)}…`
+      );
+      return { ok: true, data: { payment: existing, link } };
+    }
+    if (existing.status === "failed") {
+      return {
+        ok: false,
+        error: "This transaction was already recorded as failed.",
+        code: "PAYMENT_FAILED",
+      };
+    }
+    // pending → resume verification on this existing row. The funds were
+    // already sent, so we deliberately skip the link-status/currency gates and
+    // go straight to on-chain verification.
+    console.log(
+      `[velora] submitPayment resuming pending payment sig=${input.txSignature.slice(0, 12)}…`
+    );
+    payment = existing;
+  } else {
+    // New signature — apply the link-status and currency gates only for a fresh
+    // payment (a resume above must not be blocked by these).
+    const eff = effectiveStatus(link);
+    if (eff === "paid") {
+      return {
+        ok: false,
+        error: "This payment link has already been paid.",
+        code: "VALIDATION",
+      };
+    }
+    if (eff !== "active") {
+      return {
+        ok: false,
+        error: `This payment link is ${eff} and cannot accept payments.`,
+        code: "VALIDATION",
+      };
+    }
+    if (link.currency !== "SOL") {
+      return {
+        ok: false,
+        error: "Only SOL payments are supported on Devnet right now.",
+        code: "VALIDATION",
+      };
+    }
+
+    // 1) Record the in-flight payment as pending with its signature.
+    const { data: pending, error: pendErr } = await supabase
+      .from("payments")
+      .insert({
+        payment_link_id: link.id,
+        payer_wallet: input.payerWallet,
+        amount,
+        currency: link.currency,
+        status: "pending",
+        network: link.network,
+        tx_signature: input.txSignature,
+        metadata: { simulated: false },
+      })
+      .select("*")
+      .single();
+
+    if (pendErr) return dbError<PaymentReceipt>(pendErr);
+    payment = pending as Payment;
   }
-
-  // 1) Record the in-flight payment as pending with its signature.
-  const { data: pending, error: pendErr } = await supabase
-    .from("payments")
-    .insert({
-      payment_link_id: link.id,
-      payer_wallet: input.payerWallet,
-      amount,
-      currency: link.currency,
-      status: "pending",
-      network: link.network,
-      tx_signature: input.txSignature,
-      metadata: { simulated: false },
-    })
-    .select("*")
-    .single();
-
-  if (pendErr) return dbError<PaymentReceipt>(pendErr);
-  const payment = pending as Payment;
 
   const markFailed = async (reason: string | null) => {
     await supabase

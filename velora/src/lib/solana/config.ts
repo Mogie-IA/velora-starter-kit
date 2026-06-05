@@ -47,15 +47,19 @@ export function createConnection(): Connection {
   return new Connection(SOLANA_RPC_URL, "confirmed");
 }
 
-export const EXPLORER_BASE_URL =
-  SOLANA_NETWORK === "mainnet-beta"
-    ? "https://explorer.solana.com"
-    : `https://explorer.solana.com?cluster=${SOLANA_NETWORK}`;
+export const EXPLORER_BASE_URL = "https://explorer.solana.com";
+
+// The cluster MUST be a query param AFTER the path, e.g.
+// https://explorer.solana.com/tx/<sig>?cluster=devnet — putting it before the
+// path (…?cluster=devnet/tx/<sig>) makes Explorer treat the path as "/" and
+// redirect to its homepage.
+const EXPLORER_CLUSTER_QUERY =
+  SOLANA_NETWORK === "mainnet-beta" ? "" : `?cluster=${SOLANA_NETWORK}`;
 
 export function getExplorerTxUrl(signature: string): string {
-  return `${EXPLORER_BASE_URL}/tx/${signature}`;
+  return `${EXPLORER_BASE_URL}/tx/${signature}${EXPLORER_CLUSTER_QUERY}`;
 }
 
 export function getExplorerAddressUrl(address: string): string {
-  return `${EXPLORER_BASE_URL}/address/${address}`;
+  return `${EXPLORER_BASE_URL}/address/${address}${EXPLORER_CLUSTER_QUERY}`;
 }

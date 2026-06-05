@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   Receipt,
   AppWindow,
+  Settings,
   LogOut,
   Menu,
   X,
@@ -34,6 +35,7 @@ const merchantNav = [
     icon: RefreshCcw,
     soon: true,
   },
+  { href: "/merchant/settings", label: "Settings", icon: Settings },
 ];
 
 const consumerNav = [

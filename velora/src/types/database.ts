@@ -139,6 +139,48 @@ export interface Database {
           },
         ];
       };
+      merchant_profiles: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          wallet_address: string;
+          business_name: string;
+          display_name: string | null;
+          logo_url: string | null;
+          website: string | null;
+          description: string | null;
+          support_email: string | null;
+          metadata: Json | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          wallet_address: string;
+          business_name: string;
+          display_name?: string | null;
+          logo_url?: string | null;
+          website?: string | null;
+          description?: string | null;
+          support_email?: string | null;
+          metadata?: Json | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          wallet_address?: string;
+          business_name?: string;
+          display_name?: string | null;
+          logo_url?: string | null;
+          website?: string | null;
+          description?: string | null;
+          support_email?: string | null;
+          metadata?: Json | null;
+        };
+        Relationships: [];
+      };
       consumers: {
         Row: {
           id: string;

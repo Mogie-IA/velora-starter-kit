@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuthContext } from "@/features/auth/context/AuthContext";
 import { shortenAddress } from "@/lib/solana/config";
+import { useMerchantProfile } from "@/features/merchant";
 import { usePaymentLinks } from "../hooks/usePaymentLinks";
 import { CreatePaymentLinkDialog } from "./CreatePaymentLinkDialog";
 import { ShareLinkDialog } from "./ShareLinkDialog";
@@ -16,8 +17,11 @@ import type { PaymentLink } from "../types";
 export function PaymentsView() {
   const { user, walletAddress } = useAuthContext();
   const merchantWallet = walletAddress ?? "";
+  const { data: profile } = useMerchantProfile(walletAddress);
   const merchantName =
-    user?.displayName ?? (walletAddress ? shortenAddress(walletAddress) : "Velora Merchant");
+    profile?.business_name?.trim() ||
+    user?.displayName ||
+    (walletAddress ? shortenAddress(walletAddress) : "Velora Merchant");
 
   const { data: links, isLoading, error } = usePaymentLinks(walletAddress);
 

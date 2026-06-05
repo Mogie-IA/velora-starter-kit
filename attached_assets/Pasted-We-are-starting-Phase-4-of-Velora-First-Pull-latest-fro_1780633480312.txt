@@ -1,0 +1,179 @@
+We are starting Phase 4 of Velora.
+
+First:
+- Pull latest from GitHub.
+- Continue from the Phase 3 release.
+- Keep GitHub sync active.
+- Use the existing Velora design system.
+- Use Solana Devnet only.
+- Do not expose secrets, API keys, seed phrases, private keys, or service-role keys.
+
+PHASE 4 GOAL:
+Build Merchant Identity and Payment Operations.
+
+Velora already supports wallet authentication, payment links, checkout, real Solana Devnet payments, receipts, and merchant payment history.
+
+Phase 4 should make the merchant side feel like a real business product.
+
+DO NOT BUILD:
+- Subscriptions
+- Embedded wallets
+- Google or Apple sign-in
+- Marketplace
+- Mainnet support
+- Full analytics dashboard
+- Landing page redesign
+- Helius webhooks
+
+Build ONLY:
+
+1. Merchant Profile
+
+Create merchant profile support.
+
+Fields:
+- business_name
+- display_name
+- wallet_address
+- logo_url optional
+- website optional
+- description optional
+- support_email optional
+- created_at
+- updated_at
+
+Merchant should be able to:
+- create profile
+- edit profile
+- save profile
+- view profile completion status
+
+2. Merchant Onboarding
+
+When a merchant connects wallet for the first time:
+- check if merchant profile exists
+- if not, guide them through a simple onboarding flow
+- do not block existing dashboard completely
+- show a clear "Complete your merchant profile" prompt
+
+3. Merchant Settings Page
+
+Create a Merchant Settings page.
+
+Sections:
+- Business Profile
+- Wallet Information
+- Payment Preferences
+- Devnet Environment Info
+
+Settings should show:
+- connected wallet
+- business name
+- display name
+- website
+- support email
+- logo placeholder/upload field, but do not implement real file upload unless simple
+- devnet status
+
+4. Checkout Branding
+
+Payment checkout should now show merchant identity instead of only wallet address.
+
+Checkout should display:
+- merchant business name
+- merchant logo or fallback avatar
+- merchant description if available
+- support email if available
+- wallet address still available but visually secondary
+
+5. Payment Operations Improvements
+
+Improve the merchant payments page.
+
+Add:
+- confirmed payments section
+- pending payments section
+- failed payments section if available
+- better transaction status badges
+- clearer payment link status
+- copy transaction signature
+- open Solana Explorer
+- basic filtering by status
+
+6. Dashboard Improvements
+
+Update Merchant Dashboard overview to show:
+- total confirmed revenue
+- confirmed payment count
+- pending payment count
+- active payment links
+- latest payments
+
+Use live Supabase data where available.
+
+If data is missing, show clean empty states.
+
+7. UX/UI Quality
+
+Design must feel premium and production-ready.
+
+Use:
+- clean cards
+- strong hierarchy
+- subtle animations
+- helpful empty states
+- mobile-responsive layouts
+- clear loading states
+- clean form validation
+
+Design inspiration:
+- Stripe Dashboard
+- Linear
+- Coinbase Commerce
+- Lemon Squeezy
+- Apple-style settings panels
+
+8. Database
+
+Create or update Supabase schema for merchant_profiles.
+
+Use RLS safely.
+
+Do not break existing payment_links, payments, or transactions.
+
+Existing payment links must continue working.
+
+9. Security
+
+- Do not expose service-role keys on the frontend
+- Validate all forms with Zod
+- Use server actions for writes
+- Keep wallet address as the merchant identity anchor
+- Do not allow profile updates for a wallet that is not connected
+
+10. Testing
+
+Before completion, test:
+
+- merchant profile creation
+- merchant profile editing
+- dashboard metrics
+- checkout branding
+- payment history still works
+- existing payment links still open
+- confirmed transaction still displays
+- TypeScript passes
+- no secrets committed
+
+11. GitHub
+
+When complete:
+
+Commit message:
+feat(merchant): complete phase 4 merchant identity and operations
+
+Push to GitHub.
+
+Stop and wait for Phase 5 instructions.
+
+Do not proceed beyond Phase 4.

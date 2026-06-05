@@ -1,0 +1,245 @@
+PHASE 3 — SOLANA PAYMENT PROCESSING & SETTLEMENT
+
+First:
+
+* Pull latest from GitHub.
+* Continue from Phase 2.
+* Keep GitHub sync active.
+* Continue using the Velora design system.
+* Use Solana Devnet only.
+* Do not expose secrets, API keys, seed phrases, private keys, or service-role keys.
+
+PHASE 3 OBJECTIVE
+
+Transform Velora from a payment-link platform into a functioning Solana payment processor.
+
+A customer should be able to complete an actual Devnet payment from Phantom and have Velora automatically record and confirm it.
+
+DO NOT BUILD
+
+* Embedded wallets
+* Google Sign-In
+* Apple Sign-In
+* Subscription billing
+* Marketplace features
+* Merchant storefronts
+* Analytics dashboards
+* Mainnet support
+
+Build ONLY the payment-processing layer.
+
+========================================
+PAYMENT EXECUTION
+=================
+
+On checkout:
+
+1. Connect Phantom Wallet
+2. Validate wallet connection
+3. Validate payment link
+4. Generate Solana transaction
+5. Send transaction on Devnet
+6. Capture transaction signature
+7. Store transaction signature
+8. Update payment status
+
+Supported:
+
+* SOL payments
+
+USDC architecture may be prepared but does not need full implementation.
+
+========================================
+CHECKOUT IMPROVEMENTS
+=====================
+
+Consumer Checkout should display:
+
+* Merchant Name
+* Merchant Wallet
+* Payment Title
+* Description
+* Amount
+* Currency
+* Network Badge (Devnet)
+* Wallet Status
+
+Buttons:
+
+* Connect Wallet
+* Pay Now
+
+States:
+
+* Wallet Not Connected
+* Processing Payment
+* Awaiting Confirmation
+* Payment Successful
+* Payment Failed
+
+========================================
+TRANSACTION RECORDING
+=====================
+
+When payment succeeds:
+
+Store:
+
+* Transaction Signature
+* Payer Wallet
+* Merchant Wallet
+* Amount
+* Currency
+* Payment Link ID
+* Timestamp
+* Network
+
+Update:
+
+payments table
+
+transactions table
+
+payment_links status
+
+========================================
+PAYMENT STATUS ENGINE
+=====================
+
+Create payment lifecycle:
+
+Draft
+↓
+Active
+↓
+Pending
+↓
+Confirmed
+
+Failed path:
+
+Pending
+↓
+Failed
+
+Statuses should update automatically.
+
+========================================
+SOLANA INTEGRATION
+==================
+
+Use:
+
+* Solana Wallet Adapter
+* Helius RPC
+* Solana Web3.js
+
+Requirements:
+
+* Devnet only
+* Real Devnet transactions
+* Proper error handling
+* Confirmation tracking
+
+========================================
+MERCHANT DASHBOARD UPDATES
+==========================
+
+Add:
+
+Payment History
+
+Show:
+
+* Payment Name
+* Amount
+* Currency
+* Status
+* Date
+* Transaction Signature
+
+Allow:
+
+* View Payment
+* View Transaction
+
+========================================
+RECEIPTS
+========
+
+After payment:
+
+Generate receipt screen showing:
+
+* Merchant
+* Amount
+* Currency
+* Wallet Address
+* Transaction Signature
+* Timestamp
+* Status
+
+Provide:
+
+* Copy Transaction Signature
+* Back to Dashboard
+
+========================================
+USER EXPERIENCE
+===============
+
+Design should feel like:
+
+* Stripe
+* Coinbase Commerce
+* Apple Pay
+
+Use:
+
+* Success animations
+* Skeleton loaders
+* Clear confirmation states
+* Error recovery states
+
+Mobile experience must feel first-class.
+
+========================================
+SECURITY
+========
+
+* Never expose secrets
+* Validate payment amounts
+* Validate payment links
+* Validate wallet connection
+* Validate transaction results
+
+========================================
+TESTING
+=======
+
+Before completion:
+
+* Test wallet connection
+* Test payment execution
+* Test transaction confirmation
+* Test receipt generation
+* Test payment history
+* Test mobile responsiveness
+* Confirm TypeScript passes
+* Confirm no secrets are committed
+
+========================================
+GITHUB
+======
+
+When complete:
+
+Commit:
+
+feat(payments): implement phase 3 solana payment processing
+
+Push to GitHub.
+
+Stop and wait for Phase 4 instructions.
+
+Do not proceed beyond Phase 3.

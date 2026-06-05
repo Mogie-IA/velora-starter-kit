@@ -1,5 +1,17 @@
 import { lamportsToSol } from "@/lib/solana/config";
 
+/** Returns the trimmed URL only when it uses a safe http(s) scheme, else null. */
+export function safeHttpUrl(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  try {
+    const protocol = new URL(trimmed).protocol;
+    return protocol === "http:" || protocol === "https:" ? trimmed : null;
+  } catch {
+    return null;
+  }
+}
+
 export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOptions): string {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",

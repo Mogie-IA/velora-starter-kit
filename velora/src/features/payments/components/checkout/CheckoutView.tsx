@@ -3,19 +3,31 @@
 import { useEffect, useState } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { Loader2, ShieldAlert, Lock, Wallet, ExternalLink } from "lucide-react";
+import {
+  Loader2,
+  ShieldAlert,
+  Lock,
+  Wallet,
+  ExternalLink,
+  Globe,
+  LifeBuoy,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout";
 import { submitPayment } from "@/app/actions/payments";
+import { MerchantAvatar } from "@/features/merchant/components/MerchantAvatar";
+import type { MerchantProfile } from "@/features/merchant";
 import {
   shortenAddress,
   getExplorerAddressUrl,
+  getExplorerTxUrl,
   isValidSolanaAddress,
   solToLamports,
 } from "@/lib/solana/config";
 import { sendSolPayment, PaymentError } from "@/lib/solana/payment";
+import { safeHttpUrl } from "@/lib/utils";
 import { effectiveStatus, STATUS_LABELS } from "../../status";
 import { formatAmount } from "../../format";
 import type { ActionResult, PaymentLink, PaymentReceipt as Receipt } from "../../types";
@@ -26,9 +38,11 @@ type CheckoutState = "idle" | "processing" | "awaiting" | "success" | "error";
 export function CheckoutView({
   result,
   slug,
+  merchant = null,
 }: {
   result: ActionResult<PaymentLink>;
   slug: string;
+  merchant?: MerchantProfile | null;
 }) {
   return (
     <>
@@ -36,7 +50,7 @@ export function CheckoutView({
       <main className="min-h-screen bg-[#faf8ff] page-container py-16">
         <div className="max-w-lg mx-auto animate-slide-up">
           {result.ok ? (
-            <CheckoutCard link={result.data} slug={slug} />
+            <CheckoutCard link={result.data} slug={slug} merchant={merchant} />
           ) : (
             <UnavailableCard
               title={
@@ -55,13 +69,22 @@ export function CheckoutView({
   );
 }
 
-function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
+function CheckoutCard({
+  link,
+  slug,
+  merchant,
+}: {
+  link: PaymentLink;
+  slug: string;
+  merchant: MerchantProfile | null;
+}) {
   const { publicKey, connected, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [mounted, setMounted] = useState(false);
   const [state, setState] = useState<CheckoutState>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<Receipt | null>(null);
+  const [signature, setSignature] = useState<string | null>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -70,6 +93,15 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
   const isSol = link.currency === "SOL";
   const merchantWalletValid = isValidSolanaAddress(link.merchant_wallet);
   const busy = state === "processing" || state === "awaiting";
+
+  // Merchant branding: prefer the saved profile, fall back to the link's name.
+  const merchantName =
+    merchant?.business_name?.trim() || link.merchant_name;
+  const merchantDescription = merchant?.description?.trim() || null;
+  // Defense-in-depth: only render links with safe http(s) schemes, even if a
+  // pre-validation row slipped a javascript:/data: URL into the profile.
+  const merchantWebsite = safeHttpUrl(merchant?.website);
+  const merchantSupportEmail = merchant?.support_email?.trim() || null;
 
   async function handlePay() {
     if (!publicKey || !connected) return;
@@ -85,24 +117,26 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
     }
 
     setErrorMsg(null);
+    setSignature(null);
     setState("processing");
 
     try {
       const lamports = solToLamports(Number(link.amount));
-      const signature = await sendSolPayment({
+      const sig = await sendSolPayment({
         connection,
         payer: publicKey,
         sendTransaction,
         toAddress: link.merchant_wallet,
         lamports,
       });
+      setSignature(sig);
 
       // Tx sent + confirmed on-chain; now record + server-verify.
       setState("awaiting");
       const res = await submitPayment({
         slug,
         payerWallet: publicKey.toBase58(),
-        txSignature: signature,
+        txSignature: sig,
       });
 
       if (!res.ok) {
@@ -126,7 +160,34 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
 
   function reset() {
     setErrorMsg(null);
+    setSignature(null);
     setState("idle");
+  }
+
+  // When a transaction was already sent (signature present) but verification
+  // came back pending, re-verify the SAME signature instead of sending another
+  // transaction — submitPayment is idempotent and resumes the pending row.
+  async function retryVerify() {
+    if (!signature || !publicKey) return;
+    setErrorMsg(null);
+    setState("awaiting");
+    try {
+      const res = await submitPayment({
+        slug,
+        payerWallet: publicKey.toBase58(),
+        txSignature: signature,
+      });
+      if (!res.ok) {
+        setErrorMsg(res.error);
+        setState("error");
+        return;
+      }
+      setReceipt(res.data);
+      setState("success");
+    } catch {
+      setErrorMsg("Could not verify the transaction. Please try again.");
+      setState("error");
+    }
   }
 
   if (state === "success" && receipt) {
@@ -145,15 +206,15 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
         {/* Merchant + network badge */}
         <div className="flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-[10px] bg-velora-gradient flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-sm">
-                {link.merchant_name.charAt(0).toUpperCase()}
-              </span>
-            </div>
+            <MerchantAvatar
+              name={merchantName}
+              logoUrl={merchant?.logo_url}
+              size={36}
+            />
             <div className="min-w-0">
               <p className="text-label-sm text-[#797588]">Paying</p>
               <p className="text-title-sm font-semibold text-[#1a1b21] truncate">
-                {link.merchant_name}
+                {merchantName}
               </p>
             </div>
           </div>
@@ -268,13 +329,27 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
                     <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <span>{errorMsg}</span>
                   </div>
+                  {signature && (
+                    <div className="flex items-center justify-between text-body-sm bg-[#f4f3fb] rounded-[12px] px-4 py-3">
+                      <span className="text-[#797588]">Transaction</span>
+                      <a
+                        href={getExplorerTxUrl(signature)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 font-mono text-[#5427e6]"
+                      >
+                        {shortenAddress(signature, 6)}
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  )}
                   {connected && (
                     <Button
                       variant="secondary"
-                      onClick={reset}
+                      onClick={signature ? retryVerify : reset}
                       className="w-full"
                     >
-                      Try again
+                      {signature ? "Re-check confirmation" : "Try again"}
                     </Button>
                   )}
                 </div>
@@ -287,6 +362,41 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
             </>
           )}
         </div>
+
+        {/* Merchant branding footer */}
+        {(merchantDescription || merchantWebsite || merchantSupportEmail) && (
+          <div className="mt-6 pt-5 border-t border-[#eeedf5] space-y-3">
+            {merchantDescription && (
+              <p className="text-body-sm text-[#484556] text-center">
+                {merchantDescription}
+              </p>
+            )}
+            {(merchantWebsite || merchantSupportEmail) && (
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                {merchantWebsite && (
+                  <a
+                    href={merchantWebsite}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-label-sm text-[#5427e6] hover:underline"
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    Website
+                  </a>
+                )}
+                {merchantSupportEmail && (
+                  <a
+                    href={`mailto:${merchantSupportEmail}`}
+                    className="inline-flex items-center gap-1.5 text-label-sm text-[#5427e6] hover:underline"
+                  >
+                    <LifeBuoy className="w-3.5 h-3.5" />
+                    Support
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
