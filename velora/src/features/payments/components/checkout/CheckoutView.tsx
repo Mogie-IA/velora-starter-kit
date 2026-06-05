@@ -1,20 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { Loader2, ShieldAlert, Lock } from "lucide-react";
+import { Loader2, ShieldAlert, Lock, Wallet, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout";
-import { recordPayment } from "@/app/actions/payments";
+import { submitPayment } from "@/app/actions/payments";
+import {
+  shortenAddress,
+  getExplorerAddressUrl,
+  isValidSolanaAddress,
+  solToLamports,
+} from "@/lib/solana/config";
+import { sendSolPayment, PaymentError } from "@/lib/solana/payment";
 import { effectiveStatus, STATUS_LABELS } from "../../status";
 import { formatAmount } from "../../format";
 import type { ActionResult, PaymentLink, PaymentReceipt as Receipt } from "../../types";
 import { PaymentReceipt } from "./PaymentReceipt";
 
-type CheckoutState = "idle" | "paying" | "success" | "error";
+type CheckoutState = "idle" | "processing" | "awaiting" | "success" | "error";
 
 export function CheckoutView({
   result,
@@ -49,7 +56,8 @@ export function CheckoutView({
 }
 
 function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected, sendTransaction } = useWallet();
+  const { connection } = useConnection();
   const [mounted, setMounted] = useState(false);
   const [state, setState] = useState<CheckoutState>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -59,25 +67,66 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
 
   const status = effectiveStatus(link);
   const payable = status === "active";
+  const isSol = link.currency === "SOL";
+  const merchantWalletValid = isValidSolanaAddress(link.merchant_wallet);
+  const busy = state === "processing" || state === "awaiting";
 
   async function handlePay() {
-    if (!publicKey) return;
-    setState("paying");
-    setErrorMsg(null);
-    // Simulated Devnet confirmation (Phase 2 foundation — no real transfer).
-    await new Promise((r) => setTimeout(r, 1600));
-    const res = await recordPayment({
-      slug,
-      payerWallet: publicKey.toBase58(),
-      simulated: true,
-    });
-    if (!res.ok) {
-      setErrorMsg(res.error);
+    if (!publicKey || !connected) return;
+    if (!isSol) {
+      setErrorMsg("Only SOL payments are supported on Devnet right now.");
       setState("error");
       return;
     }
-    setReceipt(res.data);
-    setState("success");
+    if (!merchantWalletValid) {
+      setErrorMsg("This merchant's wallet address is invalid.");
+      setState("error");
+      return;
+    }
+
+    setErrorMsg(null);
+    setState("processing");
+
+    try {
+      const lamports = solToLamports(Number(link.amount));
+      const signature = await sendSolPayment({
+        connection,
+        payer: publicKey,
+        sendTransaction,
+        toAddress: link.merchant_wallet,
+        lamports,
+      });
+
+      // Tx sent + confirmed on-chain; now record + server-verify.
+      setState("awaiting");
+      const res = await submitPayment({
+        slug,
+        payerWallet: publicKey.toBase58(),
+        txSignature: signature,
+      });
+
+      if (!res.ok) {
+        setErrorMsg(res.error);
+        setState("error");
+        return;
+      }
+      setReceipt(res.data);
+      setState("success");
+    } catch (err) {
+      const message =
+        err instanceof PaymentError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : "Payment failed. Please try again.";
+      setErrorMsg(message);
+      setState("error");
+    }
+  }
+
+  function reset() {
+    setErrorMsg(null);
+    setState("idle");
   }
 
   if (state === "success" && receipt) {
@@ -93,7 +142,7 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
   return (
     <Card hoverable={false}>
       <CardContent className="p-8">
-        {/* Merchant + test banner */}
+        {/* Merchant + network badge */}
         <div className="flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 rounded-[10px] bg-velora-gradient flex items-center justify-center flex-shrink-0">
@@ -108,7 +157,7 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
               </p>
             </div>
           </div>
-          <Badge variant="warning">Devnet · Test</Badge>
+          <Badge variant="warning">Devnet</Badge>
         </div>
 
         {/* Amount */}
@@ -121,6 +170,24 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
             <p className="text-body-sm text-[#797588] mt-1 max-w-sm mx-auto">
               {link.description}
             </p>
+          )}
+        </div>
+
+        {/* Merchant wallet */}
+        <div className="flex items-center justify-between text-body-sm mt-5">
+          <span className="text-[#797588]">Merchant wallet</span>
+          {merchantWalletValid ? (
+            <a
+              href={getExplorerAddressUrl(link.merchant_wallet)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 font-mono text-[#5427e6]"
+            >
+              {shortenAddress(link.merchant_wallet)}
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          ) : (
+            <span className="font-mono text-[#ba1a1a]">Invalid address</span>
           )}
         </div>
 
@@ -144,8 +211,27 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
             </div>
           ) : (
             <>
+              {/* Wallet status */}
+              <div className="flex items-center justify-between text-body-sm bg-[#f4f3fb] rounded-[12px] px-4 py-3">
+                <span className="inline-flex items-center gap-2 text-[#797588]">
+                  <Wallet className="w-4 h-4" />
+                  Wallet
+                </span>
+                {mounted && connected && publicKey ? (
+                  <span className="inline-flex items-center gap-2 font-mono text-[#1a1b21]">
+                    <span className="w-2 h-2 rounded-full bg-[#007d51]" />
+                    {shortenAddress(publicKey.toBase58())}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2 text-[#797588]">
+                    <span className="w-2 h-2 rounded-full bg-[#c2c0cc]" />
+                    Not connected
+                  </span>
+                )}
+              </div>
+
               {mounted && !connected && (
-                <div className="flex flex-col items-center gap-2">
+                <div className="flex flex-col items-center gap-2 pt-1">
                   <p className="text-body-sm text-[#484556]">
                     Connect your Solana wallet to pay
                   </p>
@@ -155,47 +241,73 @@ function CheckoutCard({ link, slug }: { link: PaymentLink; slug: string }) {
 
               {mounted && connected && (
                 <>
-                  <div className="flex items-center justify-between text-body-sm bg-[#f4f3fb] rounded-[12px] px-4 py-3">
-                    <span className="text-[#797588]">Paying from</span>
-                    <span className="font-mono text-[#1a1b21]">
-                      {publicKey?.toBase58().slice(0, 4)}…
-                      {publicKey?.toBase58().slice(-4)}
-                    </span>
-                  </div>
+                  {busy ? (
+                    <ProcessingPanel state={state} />
+                  ) : (
+                    <Button
+                      variant="primary"
+                      onClick={handlePay}
+                      disabled={!isSol || !merchantWalletValid}
+                      className="w-full inline-flex items-center justify-center gap-2"
+                    >
+                      Pay {formatAmount(Number(link.amount), link.currency)}
+                    </Button>
+                  )}
 
-                  <Button
-                    variant="primary"
-                    onClick={handlePay}
-                    disabled={state === "paying"}
-                    className="w-full inline-flex items-center justify-center gap-2"
-                  >
-                    {state === "paying" ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Confirming…
-                      </>
-                    ) : (
-                      <>Pay {formatAmount(Number(link.amount), link.currency)}</>
-                    )}
-                  </Button>
+                  {!isSol && (
+                    <p className="text-label-sm text-[#a87900] text-center">
+                      USDC checkout is coming soon — this link is priced in USDC.
+                    </p>
+                  )}
                 </>
               )}
 
-              {errorMsg && (
-                <div className="flex items-start gap-2 text-label-md text-[#ba1a1a] bg-[#fdf3f3] rounded-[12px] px-3 py-2.5">
-                  <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <span>{errorMsg}</span>
+              {state === "error" && errorMsg && (
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2 text-label-md text-[#ba1a1a] bg-[#fdf3f3] rounded-[12px] px-3 py-2.5">
+                    <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span>{errorMsg}</span>
+                  </div>
+                  {connected && (
+                    <Button
+                      variant="secondary"
+                      onClick={reset}
+                      className="w-full"
+                    >
+                      Try again
+                    </Button>
+                  )}
                 </div>
               )}
 
               <p className="text-label-sm text-[#797588] text-center">
-                Test mode on Solana Devnet — no real funds are transferred.
+                Real transaction on Solana Devnet — testnet SOL only, no
+                mainnet funds.
               </p>
             </>
           )}
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function ProcessingPanel({ state }: { state: CheckoutState }) {
+  const processing = state === "processing";
+  return (
+    <div className="flex flex-col items-center gap-3 bg-[#f4f3fb] rounded-[14px] p-6 text-center">
+      <Loader2 className="w-7 h-7 text-[#5427e6] animate-spin" />
+      <div>
+        <p className="text-title-sm font-semibold text-[#1a1b21]">
+          {processing ? "Processing payment" : "Awaiting confirmation"}
+        </p>
+        <p className="text-body-sm text-[#484556] mt-0.5">
+          {processing
+            ? "Approve the transaction in your wallet…"
+            : "Verifying your transaction on Solana Devnet…"}
+        </p>
+      </div>
+    </div>
   );
 }
 

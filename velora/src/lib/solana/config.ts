@@ -3,6 +3,7 @@ import {
   type Cluster,
   Connection,
   LAMPORTS_PER_SOL,
+  PublicKey,
 } from "@solana/web3.js";
 
 export const SOLANA_NETWORK =
@@ -29,6 +30,17 @@ export function formatSol(lamports: number, decimals = 4): string {
 
 export function shortenAddress(address: string, chars = 4): string {
   return `${address.slice(0, chars)}...${address.slice(-chars)}`;
+}
+
+/** Returns true if the string is a syntactically valid Solana public key. */
+export function isValidSolanaAddress(address: string): boolean {
+  try {
+    // eslint-disable-next-line no-new
+    new PublicKey(address);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function createConnection(): Connection {

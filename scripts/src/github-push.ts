@@ -87,45 +87,72 @@ async function main() {
     `Uploading ${allTrackedFiles.length} git-tracked files to GitHub...`
   );
 
-  // 3. Create blobs for every tracked file
+  // 3. Create blobs for every tracked file. Uploads run with bounded
+  //    concurrency and retries so the whole push fits within tight shell time
+  //    limits and survives transient GitHub 5xx responses.
   const treeItems: Array<{
     path: string;
     mode: string;
     type: string;
     sha: string;
-  }> = [];
+  }> = new Array(allTrackedFiles.length);
 
-  for (let i = 0; i < allTrackedFiles.length; i++) {
-    const filePath = allTrackedFiles[i];
+  const CONCURRENCY = 6;
+  const MAX_RETRIES = 7;
+  let completed = 0;
+  let cursor = 0;
+
+  async function createBlob(filePath: string): Promise<string> {
     const content = fs.readFileSync(filePath);
     const base64Content = content.toString("base64");
-
-    const modeRaw = execSync(
-      `git ls-files --format='%(objectmode)' -- "${filePath}" 2>/dev/null`,
-      { encoding: "utf-8" }
-    ).trim();
-    const mode = modeRaw === "100755" ? "100755" : "100644";
-
-    const resp = await ghApi(
-      connectors,
-      `/repos/${OWNER}/${REPO}/git/blobs`,
-      "POST",
-      { content: base64Content, encoding: "base64" }
-    );
-
-    if (resp.status !== 201) {
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      const resp = await ghApi(
+        connectors,
+        `/repos/${OWNER}/${REPO}/git/blobs`,
+        "POST",
+        { content: base64Content, encoding: "base64" }
+      );
+      if (resp.status === 201) {
+        const blob = (await resp.json()) as { sha: string };
+        return blob.sha;
+      }
+      // Retry transient server errors / rate limits; fail loudly otherwise.
+      if (resp.status >= 500 || resp.status === 429) {
+        await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+        continue;
+      }
       throw new Error(
-        `Blob creation failed for ${filePath}: ${await resp.text()}`
+        `Blob creation failed for ${filePath}: ${resp.status} ${await resp.text()}`
       );
     }
+    throw new Error(
+      `Blob creation failed for ${filePath} after ${MAX_RETRIES} attempts (transient errors)`
+    );
+  }
 
-    const blob = (await resp.json()) as { sha: string };
-    treeItems.push({ path: filePath, mode, type: "blob", sha: blob.sha });
-
-    if ((i + 1) % 20 === 0 || i === allTrackedFiles.length - 1) {
-      process.stdout.write(`  [${i + 1}/${allTrackedFiles.length}] blobs created\r`);
+  async function worker() {
+    while (cursor < allTrackedFiles.length) {
+      const i = cursor++;
+      const filePath = allTrackedFiles[i];
+      const modeRaw = execSync(
+        `git ls-files --format='%(objectmode)' -- "${filePath}" 2>/dev/null`,
+        { encoding: "utf-8" }
+      ).trim();
+      const mode = modeRaw === "100755" ? "100755" : "100644";
+      const sha = await createBlob(filePath);
+      treeItems[i] = { path: filePath, mode, type: "blob", sha };
+      completed++;
+      if (completed % 20 === 0 || completed === allTrackedFiles.length) {
+        process.stdout.write(
+          `  [${completed}/${allTrackedFiles.length}] blobs created\r`
+        );
+      }
     }
   }
+
+  await Promise.all(
+    Array.from({ length: Math.min(CONCURRENCY, allTrackedFiles.length) }, worker)
+  );
   console.log();
 
   // 4. Create tree

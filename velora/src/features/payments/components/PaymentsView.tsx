@@ -10,6 +10,7 @@ import { usePaymentLinks } from "../hooks/usePaymentLinks";
 import { CreatePaymentLinkDialog } from "./CreatePaymentLinkDialog";
 import { ShareLinkDialog } from "./ShareLinkDialog";
 import { PaymentLinkCard } from "./PaymentLinkCard";
+import { PaymentHistory } from "./PaymentHistory";
 import type { PaymentLink } from "../types";
 
 export function PaymentsView() {
@@ -113,6 +114,12 @@ export function PaymentsView() {
       )}
 
       <ShareLinkDialog link={shareLink} open={shareOpen} onOpenChange={setShareOpen} />
+
+      {walletAddress && !dbNotSetup && (
+        <div className="pt-4 border-t border-[#eeedf5]">
+          <PaymentHistory merchantWallet={walletAddress} />
+        </div>
+      )}
     </div>
   );
 }

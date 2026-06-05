@@ -8,6 +8,7 @@ import {
 import {
   createPaymentLink,
   listPaymentLinks,
+  listPaymentsForMerchant,
   setPaymentLinkStatus,
 } from "@/app/actions/payments";
 import type {
@@ -39,6 +40,15 @@ export function useCreatePaymentLink(merchantWallet: string | null) {
         queryKey: ["payment-links", merchantWallet],
       });
     },
+  });
+}
+
+export function useMerchantPayments(merchantWallet: string | null) {
+  return useQuery({
+    queryKey: ["merchant-payments", merchantWallet],
+    enabled: Boolean(merchantWallet),
+    queryFn: async () =>
+      unwrap(await listPaymentsForMerchant(merchantWallet ?? "")),
   });
 }
 

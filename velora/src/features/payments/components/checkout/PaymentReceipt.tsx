@@ -1,17 +1,31 @@
 "use client";
 
-import { CheckCircle2, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, ExternalLink, Copy, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { shortenAddress, getExplorerTxUrl } from "@/lib/solana/config";
 import { formatAmount } from "../../format";
 import type { PaymentReceipt as Receipt } from "../../types";
 
 export function PaymentReceipt({ receipt }: { receipt: Receipt }) {
   const { payment, link } = receipt;
+  const [copied, setCopied] = useState(false);
+
+  async function copySignature() {
+    if (!payment.tx_signature) return;
+    try {
+      await navigator.clipboard.writeText(payment.tx_signature);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* clipboard unavailable — no-op */
+    }
+  }
 
   return (
     <div className="flex flex-col items-center text-center animate-slide-up">
-      <div className="w-16 h-16 rounded-full bg-[rgba(0,125,81,0.1)] flex items-center justify-center mb-4">
+      <div className="w-16 h-16 rounded-full bg-[rgba(0,125,81,0.1)] flex items-center justify-center mb-4 animate-receipt-pop">
         <CheckCircle2 className="w-9 h-9 text-[#007d51]" />
       </div>
       <h2 className="text-headline-md text-[#1a1b21]">Payment successful</h2>
@@ -25,15 +39,22 @@ export function PaymentReceipt({ receipt }: { receipt: Receipt }) {
             {formatAmount(Number(payment.amount), link.currency)}
           </span>
         </Row>
+        <Row label="Currency">{link.currency}</Row>
         <Row label="Paid to">{link.merchant_name}</Row>
+        <Row label="Merchant wallet">
+          <span className="font-mono">{shortenAddress(link.merchant_wallet)}</span>
+        </Row>
         <Row label="From wallet">
           <span className="font-mono">{shortenAddress(payment.payer_wallet)}</span>
         </Row>
         <Row label="Date">
           {new Date(payment.confirmed_at ?? payment.created_at).toLocaleString()}
         </Row>
+        <Row label="Status">
+          <Badge variant="success">Confirmed</Badge>
+        </Row>
         <Row label="Network">
-          <Badge variant="warning">Devnet · Test</Badge>
+          <Badge variant="warning">Devnet</Badge>
         </Row>
         <Row label="Transaction">
           {payment.tx_signature ? (
@@ -47,15 +68,35 @@ export function PaymentReceipt({ receipt }: { receipt: Receipt }) {
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           ) : (
-            <span className="text-[#797588]">Simulated — no on-chain signature</span>
+            <span className="text-[#797588]">—</span>
           )}
         </Row>
       </div>
 
-      <p className="text-label-sm text-[#797588] mt-4 max-w-sm">
-        This is a Phase 2 foundation receipt. No real funds were transferred —
-        on-chain settlement arrives in a later phase.
-      </p>
+      <div className="w-full flex flex-col sm:flex-row gap-3 mt-6">
+        {payment.tx_signature && (
+          <Button
+            variant="secondary"
+            onClick={copySignature}
+            className="flex-1 inline-flex items-center justify-center gap-2"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4" />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" />
+                Copy signature
+              </>
+            )}
+          </Button>
+        )}
+        <a href="/merchant/payments" className="btn-primary flex-1 text-center">
+          Back to dashboard
+        </a>
+      </div>
     </div>
   );
 }
