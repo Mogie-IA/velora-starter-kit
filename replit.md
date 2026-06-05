@@ -61,13 +61,17 @@ Velora is a wallet-native commerce platform for Solana with:
 ## Gotchas
 
 - Next.js app lives in `velora/` (not in `artifacts/`) — it is a standalone workspace package
+- Replit preview for Velora is a **routing-only pointer artifact** at `artifacts/velora/.replit-artifact/artifact.toml` (no `package.json`, so pnpm ignores it). It reuses artifact id `Ti9OJlxlcf65D6qijweAZ` and runs the real app via `pnpm --filter @workspace/velora run dev`. The router only discovers artifacts under `artifacts/*`, so this pointer is what makes `/` route to Velora. Do not reintroduce `velora/.replit-artifact`.
 - Run `cd velora && pnpm typecheck` not `pnpm --filter @workspace/velora run typecheck` (both work but former is clearer)
 - Wallet sign-in (challenge/signature) is Phase 1 — Phase 0 has the hook interface only
 - `@solana/wallet-adapter-backpack` is listed as a dependency but not yet added to WalletProvider — add it in Phase 1 when Backpack wallet import is stable
 - Supabase `users` table uses `primary_wallet_address` as the wallet identity column (not `wallet_address`)
+- Phase 2 payment tables (`payment_links`, `payments`, `transactions`) are wallet-native and DECOUPLED — no FKs to base `users`/`merchants` tables. Apply `velora/supabase/migrations/0001_phase2_payment_links.sql` via the Supabase SQL Editor (Replit can't reach Supabase direct/pooler Postgres for DDL). The migration includes explicit `grant ... to service_role` — Supabase's default grants don't always apply to SQL-editor-created tables, so without them the service key gets `42501 permission denied`.
+- Phase 2 checkout payments are SIMULATED on Devnet (`metadata.simulated = true`, no real funds, no real tx signature). Real wallet-signed transfers come in a later phase.
+- Phase 2 server actions in `velora/src/app/actions/payments.ts` take `merchantWallet`/`merchantUserId` as client-supplied args with no server-side auth binding (service role bypasses RLS). This is a known Phase-1 hardening item: there is no server session yet (wallet sign-in challenge/signature is Phase 1). When Phase 1 lands, derive caller identity server-side and enforce ownership on list/create/status-update — do NOT trust client-provided identifiers.
 
 ## Pointers
 
 - See `velora/README.md` for full setup, environment variables, and DB schema docs
 - See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
-- Phase roadmap: 0=Foundation ✅, 1=Wallet sign-in + payments, 2=Subscriptions + consumer portal, 3=Helius webhooks + analytics
+- Phase roadmap: 0=Foundation ✅, 1=Wallet sign-in (challenge/signature) + real on-chain payments, 2=Payment links + checkout foundation ✅ (simulated Devnet payments), 3=Subscriptions + consumer portal, 4=Helius webhooks + analytics

@@ -1,1 +1,5 @@
 - [Velora project structure](velora-project.md) — Next.js 15 app lives in `velora/` (not artifacts/), phase-based build, wallet-native identity
+- [Supabase type quirks](supabase-type-quirks.md) — @supabase/supabase-js v2.107+ requires Relationships[], CompositeTypes, and [_ in never]: never for Views/Functions; use createServiceClient (direct) not createAdminClient (SSR) in server actions
+- [Wallet adapter SSR fix](wallet-adapter-ssr.md) — WalletMultiButton and useWallet() state cause hydration mismatch; guard with mounted state before rendering any wallet-dependent UI
+- [Supabase DDL from Replit](supabase-ddl-from-replit.md) — Replit can't reach Supabase Postgres for DDL; use SQL Editor; must explicitly grant service_role or get 42501
+- [Replit preview pointer artifact](replit-preview-pointer-artifact.md) — app outside artifacts/ gets no preview route; add routing-only pointer toml under artifacts/<slug> (no package.json), reuse id, no restart needed

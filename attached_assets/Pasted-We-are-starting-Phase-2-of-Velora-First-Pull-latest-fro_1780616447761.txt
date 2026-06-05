@@ -1,0 +1,143 @@
+We are starting Phase 2 of Velora.
+
+First:
+- Pull latest from GitHub.
+- Continue from Phase 1.
+- Keep GitHub sync active.
+- Continue using the existing Velora design system.
+- Use Solana Devnet only.
+- Do not expose secrets, API keys, seed phrases, or private keys.
+
+PHASE 2 GOAL:
+Build merchant payment link creation and checkout foundation.
+
+Do NOT build:
+- recurring subscriptions
+- Helius webhooks
+- analytics dashboards
+- merchant storefront
+- production mainnet payments
+- landing page redesign
+
+Build ONLY:
+
+1. Merchant Payment Links
+
+Inside the Merchant Dashboard, allow a merchant to create a payment link.
+
+Fields:
+- Payment title
+- Description
+- Amount
+- Currency: SOL and USDC demo option
+- Customer email or wallet address optional
+- Expiry date optional
+
+After creation:
+- save payment link in Supabase
+- generate unique checkout URL
+- show QR code
+- allow copy link
+- show payment link status: Draft / Active / Paid / Expired
+
+2. Supabase Tables
+
+Create or update schema for:
+- payment_links
+- payments
+- transactions
+
+Each payment link should store:
+- id
+- merchant_id
+- merchant_wallet
+- title
+- description
+- amount
+- currency
+- status
+- checkout_url
+- created_at
+- expires_at
+
+3. Checkout Page
+
+Create a checkout page where a consumer can open a payment link.
+
+Checkout should show:
+- merchant name
+- payment title
+- amount
+- currency
+- connected wallet
+- payment status
+- pay button
+
+For Phase 2, prepare the transaction flow on Devnet but keep it safe and clearly marked as test/devnet.
+
+4. Payment Confirmation Foundation
+
+After payment action:
+- show loading state
+- show success state
+- create payment record in Supabase
+- create transaction record placeholder
+- show receipt confirmation screen
+
+5. UX/UI Requirements
+
+Design must feel premium and production-ready.
+
+Follow the existing Velora design system.
+
+The experience should feel like:
+- Stripe Checkout
+- Linear
+- Apple Pay
+- Ramp
+- Revolut
+
+Add:
+- clean empty states
+- clear form validation
+- smooth transitions
+- card hover states
+- loading skeletons
+- success animation
+- mobile-first checkout experience
+
+6. Security and Quality
+
+- Use TypeScript strictly
+- Use Zod validation for forms
+- Use reusable components
+- Do not hardcode secrets
+- Do not expose Supabase secret key on frontend
+- Use environment variables
+- Add error states
+- Add loading states
+- Keep architecture modular
+
+7. Testing
+
+Before completion:
+- test merchant creates payment link
+- test checkout URL opens
+- test QR code renders
+- test copy link works
+- test payment status updates
+- test mobile layout
+- confirm no TypeScript errors
+- confirm no secrets are committed
+
+8. GitHub
+
+When complete:
+Commit with message:
+feat: phase 2 payment links and checkout foundation
+
+Push to GitHub.
+
+Stop and wait for Phase 3 instructions.
+
+Do not proceed beyond Phase 2.
