@@ -194,7 +194,7 @@ function CheckoutCard({
     return (
       <Card hoverable={false}>
         <CardContent className="p-8">
-          <PaymentReceipt receipt={receipt} />
+          <PaymentReceipt receipt={receipt} merchantLogoUrl={merchant?.logo_url} />
         </CardContent>
       </Card>
     );

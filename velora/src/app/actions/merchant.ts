@@ -120,6 +120,81 @@ export async function upsertMerchantProfile(
   return { ok: true, data: data as MerchantProfile };
 }
 
+/** Public Storage bucket that holds merchant logo uploads. */
+const LOGO_BUCKET = "merchant-logos";
+const MAX_LOGO_BYTES = 2 * 1024 * 1024; // 2 MB
+const LOGO_MIME_EXT: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+};
+
+/**
+ * Uploads a merchant logo to Supabase Storage and returns its public URL.
+ *
+ * Accepts a `FormData` with `walletAddress` and `file`. The file is validated
+ * server-side (PNG/JPG/WEBP, ≤ 2 MB) — never trust the client. The returned URL
+ * is persisted onto the profile via `upsertMerchantProfile` when the form saves.
+ *
+ * SECURITY: like the other merchant actions, `walletAddress` is client-supplied
+ * and the service role bypasses RLS (see the Phase-1 hardening note above).
+ */
+export async function uploadMerchantLogo(
+  formData: FormData
+): Promise<ActionResult<{ url: string }>> {
+  const walletAddress = String(formData.get("walletAddress") ?? "");
+  const file = formData.get("file");
+
+  if (!walletAddress || !isValidSolanaAddress(walletAddress)) {
+    return {
+      ok: false,
+      error: "A connected, valid merchant wallet is required.",
+      code: "VALIDATION",
+    };
+  }
+
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "No image was provided.", code: "VALIDATION" };
+  }
+
+  const ext = LOGO_MIME_EXT[file.type];
+  if (!ext) {
+    return {
+      ok: false,
+      error: "Logo must be a PNG, JPG, or WEBP image.",
+      code: "VALIDATION",
+    };
+  }
+
+  if (file.size > MAX_LOGO_BYTES) {
+    return {
+      ok: false,
+      error: "Logo must be 2 MB or smaller.",
+      code: "VALIDATION",
+    };
+  }
+
+  const supabase = createServiceClient();
+  const path = `${walletAddress}/logo-${Date.now()}.${ext}`;
+  const bytes = new Uint8Array(await file.arrayBuffer());
+
+  const { error } = await supabase.storage
+    .from(LOGO_BUCKET)
+    .upload(path, bytes, { contentType: file.type, upsert: true });
+
+  if (error) {
+    return {
+      ok: false,
+      error:
+        "Could not upload the logo. Make sure the 'merchant-logos' storage bucket exists.",
+      code: "UNKNOWN",
+    };
+  }
+
+  const { data } = supabase.storage.from(LOGO_BUCKET).getPublicUrl(path);
+  return { ok: true, data: { url: data.publicUrl } };
+}
+
 /**
  * Aggregates live dashboard metrics for a merchant wallet from the Phase 2/3
  * payment tables: confirmed revenue (SOL), confirmed/pending/failed counts,

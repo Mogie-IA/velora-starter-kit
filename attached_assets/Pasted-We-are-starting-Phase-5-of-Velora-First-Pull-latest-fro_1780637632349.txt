@@ -1,0 +1,404 @@
+We are starting Phase 5 of Velora.
+
+First:
+
+* Pull latest from GitHub.
+* Continue from the Phase 4 release.
+* Keep GitHub sync active.
+* Use the existing Velora design system.
+* Use Solana Devnet only.
+* Do not expose secrets, API keys, seed phrases, private keys, or service-role keys.
+
+PHASE 5 GOAL
+
+Transform Velora from a working MVP into a polished, grant-ready, investor-ready, and demo-ready product.
+
+Velora already supports:
+
+* Wallet authentication
+* Merchant dashboards
+* Payment links
+* Real Solana Devnet payments
+* Transaction receipts
+* Merchant payment history
+* Merchant profiles
+* Merchant settings
+* Branded checkout foundation
+
+Phase 5 should focus on:
+
+* Product presentation
+* Merchant branding
+* User experience
+* Demo readiness
+* Documentation
+* Landing page experience
+
+DO NOT BUILD:
+
+* Subscriptions
+* Embedded wallets
+* Google Sign-In
+* Apple Sign-In
+* Marketplace
+* Mainnet support
+* Complex analytics
+* Major architecture changes
+
+==================================================
+
+1. LANDING PAGE V2
+   ==================================================
+
+Create a premium landing page that positions Velora as:
+
+"Wallet-native commerce infrastructure for Solana."
+
+The design quality should feel comparable to:
+
+* Stripe
+* Linear
+* Coinbase Commerce
+* Ramp
+* Vercel
+
+==================================================
+HERO SECTION
+============
+
+Headline:
+
+Accept and send payments natively on Solana.
+
+Subheadline:
+
+Create payment links, accept wallet payments, verify transactions on-chain, and manage commerce without intermediaries.
+
+Primary CTA:
+
+Create Account
+
+Secondary CTA:
+
+Try Demo
+
+Show:
+
+* Merchant dashboard preview
+* Checkout preview
+* Payment receipt preview
+
+==================================================
+ROLE SELECTION FLOW
+===================
+
+When users click Create Account:
+
+Show a role-selection screen.
+
+Option 1:
+
+Merchant
+
+Description:
+
+Accept Solana payments, create payment links, manage transactions, and operate your business.
+
+CTA:
+
+Continue as Merchant
+
+Option 2:
+
+Consumer
+
+Description:
+
+Pay merchants directly from your wallet and manage your payment history.
+
+CTA:
+
+Continue as Consumer
+
+Option 3:
+
+Developer
+
+Description:
+
+Explore wallet-native commerce infrastructure and future developer tooling.
+
+CTA:
+
+Explore Developer Tools
+
+==================================================
+LANDING PAGE NAVIGATION
+=======================
+
+Navbar:
+
+* Merchants
+* Consumers
+* Developers
+* Demo
+* Docs
+* Create Account
+
+Each nav item should scroll to the relevant section.
+
+==================================================
+MERCHANT SECTION
+================
+
+Headline:
+
+Built for merchants.
+
+Highlight:
+
+* Payment links
+* Merchant dashboard
+* Transaction history
+* Receipts
+* Merchant branding
+* Checkout experience
+
+==================================================
+CONSUMER SECTION
+================
+
+Headline:
+
+Built for customers.
+
+Highlight:
+
+* Wallet-native checkout
+* Transparent payments
+* On-chain receipts
+* No card processors
+* Fast settlement
+
+==================================================
+DEVELOPER SECTION
+=================
+
+Headline:
+
+Built for builders.
+
+Highlight:
+
+* Solana-native architecture
+* Transaction verification
+* Commerce infrastructure
+* Future APIs
+* Future SDKs
+
+==================================================
+DEMO SECTION
+============
+
+Explain the flow:
+
+1. Connect merchant wallet
+2. Complete merchant profile
+3. Create payment link
+4. Open checkout
+5. Connect consumer wallet
+6. Pay with Devnet SOL
+7. Receive receipt
+8. View merchant history
+
+Show:
+
+* Devnet badge
+* Test funds only notice
+
+==================================================
+ROADMAP SECTION
+===============
+
+Current:
+
+* Wallet Authentication
+* Merchant Profiles
+* Payment Links
+* Real Devnet Payments
+* Receipts
+* Merchant Operations
+
+Upcoming:
+
+* Subscriptions
+* Embedded Wallets
+* Mainnet
+* APIs
+* SDKs
+* Storefronts
+
+==================================================
+2. MERCHANT BRANDING UPGRADE
+============================
+
+Replace Logo URL with real logo upload.
+
+Requirements:
+
+* Upload image from device
+* Store image in Supabase Storage
+* Save storage URL automatically
+* Preview uploaded logo
+* Replace logo
+* Remove logo
+
+Validation:
+
+* PNG
+* JPG
+* WEBP
+
+Add file size limits.
+
+Display merchant logo in:
+
+* Merchant dashboard
+* Merchant settings
+* Checkout
+* Receipts
+* Payment links
+
+Do not require users to paste URLs anymore.
+
+==================================================
+3. UX POLISH
+============
+
+Reduce friction throughout the app.
+
+Add:
+
+* Back buttons where needed
+* Cancel buttons in modals
+* Better empty states
+* Better loading states
+* Better success states
+* Better error states
+* Better form validation
+* Better onboarding guidance
+
+Review all major user flows and remove obvious friction.
+
+Do not redesign the entire app.
+
+==================================================
+4. DEMO GUIDE
+=============
+
+Create:
+
+/demo
+
+or
+
+/docs/demo
+
+Explain:
+
+* How to test Velora
+* How to get Devnet SOL
+* How to create a payment link
+* How to complete a payment
+* How to view receipts
+
+==================================================
+5. DOCUMENTATION
+================
+
+Update documentation:
+
+Include:
+
+* Project overview
+* Environment setup
+* Supabase setup
+* Storage bucket setup
+* Devnet testing guide
+* Required environment variables
+* Known MVP limitations
+* Phase roadmap
+* Grant/demo explanation
+
+Do not expose secret values.
+
+==================================================
+6. README IMPROVEMENTS
+======================
+
+Update GitHub README.
+
+Include:
+
+* What Velora is
+* Current MVP capabilities
+* Demo flow
+* Setup instructions
+* Storage setup
+* Security notes
+* Roadmap
+
+==================================================
+7. GRANT-READY NARRATIVE
+========================
+
+Add:
+
+Why Velora Matters for Solana
+
+Explain:
+
+* Wallet-native commerce
+* Merchant-owned payments
+* Reduced intermediaries
+* Payment links
+* On-chain verification
+* Merchant operations
+* End-to-end Devnet payments
+
+==================================================
+8. QUALITY CHECK
+================
+
+Before completion verify:
+
+* Landing page loads
+* Merchant dashboard loads
+* Merchant settings loads
+* Logo upload works
+* Logo replacement works
+* Logo removal works
+* Payment links work
+* Checkout works
+* Demo page works
+* README updated
+* Docs updated
+* TypeScript passes
+* No secrets committed
+* Existing payment flow remains functional
+
+==================================================
+9. GITHUB
+=========
+
+When complete:
+
+Commit:
+
+chore(mvp): complete phase 5 launch readiness and branding
+
+Push to GitHub.
+
+Stop and wait for review.
+
+Do not proceed beyond Phase 5.

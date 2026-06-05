@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { shortenAddress } from "@/lib/solana/config";
+import { LogoUploader } from "./LogoUploader";
 import { useUpsertMerchantProfile } from "../hooks/useMerchantProfile";
 import { merchantProfileSchema } from "../schemas";
 import type { MerchantProfile } from "../types";
@@ -138,20 +139,18 @@ export function MerchantProfileForm({
         />
       </Field>
 
-      <Field
-        id="logoUrl"
-        label="Logo URL"
-        hint="A public image URL (https://). Optional."
-        error={errors.logoUrl}
-      >
-        <Input
-          id="logoUrl"
-          type="url"
+      <div className="space-y-1.5">
+        <Label>Logo</Label>
+        <LogoUploader
+          walletAddress={walletAddress}
+          businessName={businessName || displayName}
           value={logoUrl}
-          onChange={(e) => setLogoUrl(e.target.value)}
-          placeholder="https://…/logo.png"
+          onChange={setLogoUrl}
         />
-      </Field>
+        {errors.logoUrl && (
+          <p className="text-label-sm text-[#ba1a1a]">{errors.logoUrl}</p>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field id="website" label="Website" error={errors.website}>

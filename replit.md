@@ -42,10 +42,12 @@ Velora is a wallet-native commerce platform for Solana — enabling merchants to
 ## Product
 
 Velora is a wallet-native commerce platform for Solana with:
-- **Merchant Dashboard** — accept payments, manage products and subscriptions
-- **Consumer Portal** — view receipts, manage subscriptions, connected apps
-- **Checkout** — wallet-native one-time and recurring payment flows
-- **Docs** — integration guides and API references
+- **Landing page** — marketing site with role selection (`/get-started`), demo guide (`/demo`), and grant narrative
+- **Merchant Dashboard** — accept payments, manage payment links, view revenue/history
+- **Merchant Branding** — business name + logo upload (Supabase Storage `merchant-logos` bucket), shown on dashboard/settings/checkout/receipts
+- **Consumer Portal** — view receipts and payment history
+- **Checkout** — wallet-native one-time payment flow with on-chain verification
+- **Docs** — overview, setup, Devnet testing, env vars, limitations, roadmap, grant narrative
 
 ## User preferences
 
@@ -69,9 +71,10 @@ Velora is a wallet-native commerce platform for Solana with:
 - Phase 2 payment tables (`payment_links`, `payments`, `transactions`) are wallet-native and DECOUPLED — no FKs to base `users`/`merchants` tables. Apply `velora/supabase/migrations/0001_phase2_payment_links.sql` via the Supabase SQL Editor (Replit can't reach Supabase direct/pooler Postgres for DDL). The migration includes explicit `grant ... to service_role` — Supabase's default grants don't always apply to SQL-editor-created tables, so without them the service key gets `42501 permission denied`.
 - Phase 2 checkout payments are SIMULATED on Devnet (`metadata.simulated = true`, no real funds, no real tx signature). Real wallet-signed transfers come in a later phase.
 - Phase 2 server actions in `velora/src/app/actions/payments.ts` take `merchantWallet`/`merchantUserId` as client-supplied args with no server-side auth binding (service role bypasses RLS). This is a known Phase-1 hardening item: there is no server session yet (wallet sign-in challenge/signature is Phase 1). When Phase 1 lands, derive caller identity server-side and enforce ownership on list/create/status-update — do NOT trust client-provided identifiers.
+- Phase 5 merchant logo upload: a PUBLIC Supabase Storage bucket `merchant-logos` (file_size_limit 2MB, allowed PNG/JPG/WEBP) was created via the Storage REST API (Storage API is reachable over HTTPS even though direct/pooler Postgres for DDL is not). `uploadMerchantLogo(formData)` in `velora/src/app/actions/merchant.ts` validates type+size and returns the public URL; `LogoUploader.tsx` replaces the old Logo URL text input. Logo persists on profile Save (no orphan-deletion of old files — acceptable MVP). NOTE: like `upsertMerchantProfile` and the payment actions, `uploadMerchantLogo` trusts a client-supplied `walletAddress` and writes with the service role (no server session yet) — it shares the SAME known Phase-1 hardening gap documented above. Fixing it requires the Phase 1 wallet sign-in (challenge/signature) server session; out of scope for Phase 5.
 
 ## Pointers
 
 - See `velora/README.md` for full setup, environment variables, and DB schema docs
 - See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
-- Phase roadmap: 0=Foundation ✅, 1=Wallet sign-in (challenge/signature) + real on-chain payments, 2=Payment links + checkout foundation ✅ (simulated Devnet payments), 3=Subscriptions + consumer portal, 4=Helius webhooks + analytics
+- Phase roadmap: 0=Foundation ✅, 1=Wallet sign-in + real on-chain payments ✅, 2=Payment links + checkout foundation ✅, 3=Merchant operations & receipts ✅, 4=Merchant identity & branding ✅, 5=Launch readiness (landing V2, logo upload, /demo, docs) ✅. Next: subscriptions, embedded wallets, mainnet, public APIs/SDKs

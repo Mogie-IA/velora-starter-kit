@@ -4,11 +4,18 @@ import { useState } from "react";
 import { CheckCircle2, ExternalLink, Copy, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MerchantAvatar } from "@/features/merchant/components/MerchantAvatar";
 import { shortenAddress, getExplorerTxUrl } from "@/lib/solana/config";
 import { formatAmount } from "../../format";
 import type { PaymentReceipt as Receipt } from "../../types";
 
-export function PaymentReceipt({ receipt }: { receipt: Receipt }) {
+export function PaymentReceipt({
+  receipt,
+  merchantLogoUrl,
+}: {
+  receipt: Receipt;
+  merchantLogoUrl?: string | null;
+}) {
   const { payment, link } = receipt;
   const [copied, setCopied] = useState(false);
 
@@ -32,6 +39,17 @@ export function PaymentReceipt({ receipt }: { receipt: Receipt }) {
       <p className="text-body-md text-[#484556] mt-1">
         Your receipt for <strong>{link.title}</strong>
       </p>
+
+      <div className="mt-4 flex items-center gap-2">
+        <MerchantAvatar
+          name={link.merchant_name}
+          logoUrl={merchantLogoUrl}
+          size={24}
+        />
+        <span className="text-label-md text-[#484556]">
+          {link.merchant_name}
+        </span>
+      </div>
 
       <div className="w-full bg-[#f4f3fb] rounded-[16px] border border-[#e8e7ef] p-5 mt-6 text-left space-y-3">
         <Row label="Amount">

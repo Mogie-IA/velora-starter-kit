@@ -1,0 +1,207 @@
+We are starting Phase 5 of Velora.
+
+First:
+
+* Pull latest from GitHub.
+* Continue from the Phase 4 release.
+* Keep GitHub sync active.
+* Use the existing Velora design system.
+* Use Solana Devnet only.
+* Do not expose secrets, API keys, seed phrases, private keys, or service-role keys.
+
+PHASE 5 GOAL:
+Make Velora MVP demo-ready and grant-ready.
+
+Velora already supports:
+
+* Wallet authentication
+* Merchant dashboards
+* Payment links
+* Real Solana Devnet payments
+* Transaction receipts
+* Merchant payment history
+* Merchant profiles
+* Merchant settings
+* Branded checkout foundation
+
+Phase 5 should polish the MVP into a product that can be shown to grant reviewers, investors, and early users.
+
+DO NOT BUILD:
+
+* Subscriptions
+* Embedded wallets
+* Google or Apple sign-in
+* Marketplace
+* Mainnet support
+* Full product catalog
+* Complex analytics
+* Real logo upload/storage
+* Major architecture changes
+
+Build ONLY:
+
+1. Landing Page V2
+
+Create a polished landing page that clearly explains Velora.
+
+Positioning:
+"Wallet-native commerce infrastructure for Solana."
+
+The landing page should communicate:
+
+* Accept Solana payments
+* Create payment links
+* Let customers pay with Phantom
+* Verify payments on-chain
+* Generate receipts
+* Manage merchant payments
+* Build commerce without intermediaries
+
+Sections:
+
+* Hero section
+* Problem section
+* How it works
+* Product features
+* Merchant workflow
+* Checkout preview
+* Devnet demo status
+* Why Solana
+* MVP progress / roadmap
+* Call to action
+
+Primary CTA:
+"Open Merchant Dashboard"
+
+Secondary CTA:
+"Try Checkout Demo"
+
+2. Demo Mode / Guided Demo
+
+Add a simple demo guide page or section.
+
+Route:
+/docs/demo
+or
+/demo
+
+It should explain the demo flow:
+
+Step 1: Connect merchant wallet
+Step 2: Create payment link
+Step 3: Open checkout
+Step 4: Connect consumer wallet
+Step 5: Pay with Devnet SOL
+Step 6: View receipt
+Step 7: Check merchant payment history
+
+Include reminders:
+
+* Use Solana Devnet
+* Use test SOL only
+* No real funds required
+* Phantom or compatible Solana wallet required
+
+3. Docs Polish
+
+Update docs to include:
+
+* Project overview
+* Environment setup
+* Required Supabase tables
+* Required environment variables
+* How to test Devnet payments
+* Known MVP limitations
+* Phase roadmap
+* Grant/demo explanation
+
+Do not expose real secret values.
+
+4. README Polish
+
+Update GitHub README to make the project understandable.
+
+README should include:
+
+* What Velora is
+* Current MVP capabilities
+* Tech stack
+* Demo flow
+* Phase progress
+* Setup instructions
+* Security notes
+* Roadmap
+
+5. UX Polish
+
+Improve small friction points only.
+
+Add:
+
+* Back buttons where users may feel stuck
+* Cancel buttons in modals where needed
+* Clear loading states
+* Clear empty states
+* Better error messages
+* Better success states
+* Clear Devnet warnings
+* Clear "test funds only" messaging
+
+Do not redesign the entire app.
+Do not rebuild major flows.
+Do not implement image/logo upload yet.
+Leave logo URL as-is for now.
+
+6. Demo Data Clarity
+
+Make sure demo/test data is clearly labeled.
+
+Examples:
+
+* Devnet badge visible
+* Test payment labels
+* No real funds message
+* Transaction explorer links open correctly
+
+7. Grant-Ready Narrative
+
+Add a section in docs or README called:
+
+"Why Velora matters for Solana"
+
+It should explain:
+
+* Velora makes Solana payments easier for merchants
+* Wallet-native checkout removes card processors and middlemen
+* Payment links make Solana commerce accessible
+* Receipts and merchant dashboards make payments operational
+* The MVP proves real Devnet payments end-to-end
+
+8. Quality Check
+
+Before completion, verify:
+
+* Landing page loads
+* Merchant dashboard loads
+* Merchant settings loads
+* Payment links page loads
+* Checkout page loads
+* Demo guide page loads
+* README updated
+* Docs updated
+* TypeScript passes
+* No secrets committed
+* Existing payment flow is not broken
+
+9. GitHub
+
+When complete:
+
+Commit message:
+chore(mvp): complete phase 5 demo and launch polish
+
+Push to GitHub.
+
+Stop and wait for review.
+
+Do not proceed beyond Phase 5.
