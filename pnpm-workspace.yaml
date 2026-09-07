@@ -5,6 +5,12 @@ packages:
   - scripts
   - velora
 
+allowBuilds:
+  bufferutil: true
+  esbuild: true
+  sharp: true
+  utf-8-validate: true
+
 autoInstallPeers: false
 
 catalog:
@@ -39,9 +45,12 @@ minimumReleaseAgeExclude:
 
 onlyBuiltDependencies:
   - '@swc/core'
+  - bufferutil
   - esbuild
   - msw
+  - sharp
   - unrs-resolver
+  - utf-8-validate
 
 overrides:
   '@esbuild-kit/esm-loader': npm:tsx@^4.21.0
