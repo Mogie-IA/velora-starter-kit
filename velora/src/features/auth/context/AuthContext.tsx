@@ -40,6 +40,24 @@ function clearSession(): void {
   localStorage.removeItem(SESSION_KEY);
 }
 
+const PENDING_ROLE_KEY = "velora_pending_role";
+
+export function setPendingRole(role: UserRole): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(PENDING_ROLE_KEY, role);
+}
+
+export function clearPendingRole(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(PENDING_ROLE_KEY);
+}
+
+function getPendingRole(): UserRole | null {
+  if (typeof window === "undefined") return null;
+  const value = localStorage.getItem(PENDING_ROLE_KEY);
+  return value === "merchant" || value === "consumer" ? value : null;
+}
+
 interface AuthContextValue {
   user: WalletUser | null;
   isLoading: boolean;
@@ -108,6 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setStep("idle");
       clearSession();
+      clearPendingRole();
     }
   }, [mounted, connected, connecting]);
 
@@ -146,11 +165,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error("Authentication failed. Please try again.");
       }
 
+      // Apply a role chosen before wallet connection (new users only).
+      // Existing users keep their stored role — a pre-selected role never overrides it.
+      let role = result.role;
+      if (!role) {
+        const pendingRole = getPendingRole();
+        if (pendingRole) {
+          const saved = await updateUserRole(
+            result.userId,
+            walletAddress,
+            pendingRole
+          );
+          if (saved) role = pendingRole;
+        }
+      }
+      clearPendingRole();
+
       const now = Date.now();
       const session: StoredSession = {
         walletAddress,
         userId: result.userId,
-        role: result.role,
+        role,
         signedAt: now,
         expiresAt: now + SESSION_DURATION_MS,
       };
@@ -162,12 +197,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         displayName: null,
         avatarUrl: null,
         email: null,
-        role: result.role,
+        role,
         createdAt: new Date(now).toISOString(),
         lastLogin: new Date(now).toISOString(),
       });
 
-      setStep(result.role ? "complete" : "role_selection");
+      setStep(role ? "complete" : "role_selection");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Authentication failed";
       const isUserRejected =
@@ -214,6 +249,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     clearSession();
+    clearPendingRole();
     setUser(null);
     setStep("idle");
     setError(null);

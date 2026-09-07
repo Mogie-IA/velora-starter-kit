@@ -63,7 +63,9 @@ Velora is a wallet-native commerce platform for Solana with:
 ## Gotchas
 
 - Next.js app lives in `velora/` (not in `artifacts/`) — it is a standalone workspace package
-- Replit preview for Velora is a **routing-only pointer artifact** at `artifacts/velora/.replit-artifact/artifact.toml` (no `package.json`, so pnpm ignores it). It reuses artifact id `Ti9OJlxlcf65D6qijweAZ` and runs the real app via `pnpm --filter @workspace/velora run dev`. The router only discovers artifacts under `artifacts/*`, so this pointer is what makes `/` route to Velora. Do not reintroduce `velora/.replit-artifact`.
+- Replit preview for Velora is a **pointer artifact** at `artifacts/velora/.replit-artifact/artifact.toml` (no `package.json`, so pnpm ignores it). It reuses artifact id `Ti9OJlxlcf65D6qijweAZ` and runs the real app via `pnpm --filter @workspace/velora run dev`. The router only discovers artifacts under `artifacts/*`, so this pointer is what makes `/` route to Velora. Do not reintroduce `velora/.replit-artifact`.
+- The Velora pointer artifact MUST keep a `[services.production]` block (build `pnpm --filter @workspace/velora run build`, run `pnpm --filter @workspace/velora run start`, `PORT=3000`, health `/`). Without it the deployment only starts `api-server` and `/` returns an internal server error in production — only artifacts with a production config are run when deployed. Do not delete this block.
+- `velora/next.config.ts` adds `REPLIT_DOMAINS` (prod) entries to `serverActions.allowedOrigins`/`allowedDevOrigins` so deployed server actions (sign-in, payments) aren't rejected as cross-origin behind the Replit proxy.
 - Run `cd velora && pnpm typecheck` not `pnpm --filter @workspace/velora run typecheck` (both work but former is clearer)
 - Wallet sign-in (challenge/signature) is Phase 1 — Phase 0 has the hook interface only
 - `@solana/wallet-adapter-backpack` is listed as a dependency but not yet added to WalletProvider — add it in Phase 1 when Backpack wallet import is stable

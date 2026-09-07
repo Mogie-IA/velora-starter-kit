@@ -4,8 +4,21 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Store, Wallet, Code2 } from "lucide-react";
 import { LandingFooter } from "@/features/marketing/components/LandingFooter";
+import {
+  setPendingRole,
+  clearPendingRole,
+} from "@/features/auth/context/AuthContext";
+import type { UserRole } from "@/types/auth";
 
-const roles = [
+const roles: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  cta: string;
+  href: string;
+  accent: string;
+  pendingRole: UserRole | null;
+}[] = [
   {
     icon: Store,
     title: "Merchant",
@@ -14,6 +27,7 @@ const roles = [
     cta: "Continue as Merchant",
     href: "/merchant/dashboard",
     accent: "from-[#6d4aff] to-[#4f46e5]",
+    pendingRole: "merchant",
   },
   {
     icon: Wallet,
@@ -23,6 +37,7 @@ const roles = [
     cta: "Continue as Consumer",
     href: "/consumer/dashboard",
     accent: "from-[#4f46e5] to-[#00623e]",
+    pendingRole: "consumer",
   },
   {
     icon: Code2,
@@ -32,10 +47,19 @@ const roles = [
     cta: "Explore Developer Tools",
     href: "/docs",
     accent: "from-[#00623e] to-[#6d4aff]",
+    pendingRole: null,
   },
 ];
 
 export default function GetStartedPage() {
+  const handleSelectRole = (role: UserRole | null) => {
+    if (role) {
+      setPendingRole(role);
+    } else {
+      clearPendingRole();
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#faf8ff] flex flex-col">
       <div className="page-container flex-1 pt-10 pb-20">
@@ -68,6 +92,7 @@ export default function GetStartedPage() {
             >
               <Link
                 href={role.href}
+                onClick={() => handleSelectRole(role.pendingRole)}
                 className="velora-card p-7 h-full flex flex-col group"
               >
                 <div
