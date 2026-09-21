@@ -50,3 +50,9 @@ Thumbs.db
 
 # Replit / Next.js local tooling config
 .config/
+
+# Anchor / Solana
+contracts/target
+contracts/.anchor
+contracts/node_modules
+test-ledger
