@@ -238,3 +238,21 @@ grant all privileges on public.construction_projects to service_role;
 grant all privileges on public.construction_milestones to service_role;
 grant all privileges on public.milestone_evidence to service_role;
 grant all privileges on public.inspector_assignments to service_role;
+
+-- ---------------------------------------------------------------------------
+-- Row Level Security: on, with no policies.
+--
+-- The publishable key ships to the browser, so without RLS anyone could read
+-- or rewrite these tables directly through PostgREST — skipping the wallet
+-- signature checks in the server actions entirely. With RLS on and no
+-- policies, the anon and authenticated roles get nothing. The app is
+-- unaffected: every marketplace query runs server-side as service_role, which
+-- bypasses RLS by design.
+-- ---------------------------------------------------------------------------
+alter table public.marketplace_profiles enable row level security;
+alter table public.jobs enable row level security;
+alter table public.bids enable row level security;
+alter table public.construction_projects enable row level security;
+alter table public.construction_milestones enable row level security;
+alter table public.milestone_evidence enable row level security;
+alter table public.inspector_assignments enable row level security;
