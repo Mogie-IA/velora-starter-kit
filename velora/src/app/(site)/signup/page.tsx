@@ -32,7 +32,7 @@ export default function SignupPage() {
             {ROLE_PICKER.subtitle}
           </p>
           <div className="mt-10">
-            <RoleCards hrefFor={(role) => `/signup/${role}`} />
+            <RoleCards variant="signup" />
           </div>
         </div>
       </main>

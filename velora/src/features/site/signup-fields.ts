@@ -1,3 +1,5 @@
+import type { MarketplaceRole } from "@/types/marketplace";
+
 /**
  * Sign-up field content, per role, from the brief.
  *
@@ -57,41 +59,60 @@ export interface SignupCopy {
   title: string;
   subtitle: string;
   submitCta: string;
-  success: { title: (name: string) => string; body: string; cta: string; href: string };
+  success: {
+    title: (name: string) => string;
+    body: string;
+    cta: string;
+    href: string;
+    secondaryCta: string;
+    secondaryHref: string;
+    /** Inspectors only: a standing note in place of a verification ETA. */
+    status?: string;
+  };
 }
 
-export const SIGNUP_COPY = {
+export const SIGNUP_COPY: Record<MarketplaceRole, SignupCopy> = {
   client: {
-    title: "Create your Velora account",
-    subtitle: "Post a project, compare contractors, and fund one stage at a time.",
+    title: "Let's get your build started.",
+    subtitle: "Create your account to set up your project and begin exploring your options.",
     submitCta: "Create my account",
     success: {
       title: (name: string) => `You're in, ${name}.`,
-      body: "Tell us what you're building next, so we can help you find a contractor and an inspector.",
+      body: "Let's get your first project set up. Tell us what you're building and where you're planning to build.",
       cta: "Start my first project",
       href: "/build/jobs/new",
+      secondaryCta: "Go to dashboard",
+      secondaryHref: "/build",
     },
   },
   contractor: {
-    title: "Join Velora as a contractor",
-    subtitle: "Bid on funded jobs and get paid the moment your work is verified.",
+    title: "Get your business in front of new clients.",
+    subtitle:
+      "Create your account and build your contractor profile so you can start exploring available projects.",
     submitCta: "Create my account",
     success: {
       title: (name: string) => `Welcome, ${name}.`,
-      body: "Finish your profile so you show up in searches and can start bidding.",
+      body: "Your account is ready. Complete your profile to help clients understand your experience and discover relevant projects.",
       cta: "Complete my profile",
       href: "/build/jobs",
+      secondaryCta: "Go to dashboard",
+      secondaryHref: "/build",
     },
   },
   inspector: {
-    title: "Join Velora as an inspector",
-    subtitle: "Put your licence to work — paid site visits, on your own schedule.",
+    title: "Put your qualifications to work.",
+    subtitle:
+      "Create your profile to discover inspection opportunities and connect with clients who need professional site visits.",
     submitCta: "Create my account",
     success: {
       title: (name: string) => `Welcome, ${name}.`,
-      body: "We're verifying your credentials — we'll email you the moment your profile goes live.",
-      cta: "Browse open jobs",
-      href: "/build/jobs",
+      body: "Your account has been created. We'll review your credentials and let you know when your profile is ready.",
+      cta: "Complete my profile",
+      href: "/build",
+      secondaryCta: "Browse open jobs",
+      secondaryHref: "/build/jobs",
+      // Shown instead of a turnaround time, which is still undefined.
+      status: "Credential verification is in progress.",
     },
   },
-} satisfies Record<string, SignupCopy>;
+};

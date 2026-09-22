@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { SignupForm } from "@/features/site/components/SignupForm";
 import { SiteFooter } from "@/features/site/components/SiteFooter";
 import { SiteHeader } from "@/features/site/components/SiteHeader";
-import { TrustStrip } from "@/features/site/components/sections";
 import { ROLE_ORDER, isMarketplaceRole } from "@/features/site/content";
 import { SIGNUP_COPY } from "@/features/site/signup-fields";
 
@@ -61,12 +60,6 @@ export default async function SignupRolePage({
 
           <div className="mt-10">
             <SignupForm role={role} />
-          </div>
-        </div>
-
-        <div className="pb-20">
-          <div className="mx-auto max-w-2xl">
-            <TrustStrip />
           </div>
         </div>
       </main>

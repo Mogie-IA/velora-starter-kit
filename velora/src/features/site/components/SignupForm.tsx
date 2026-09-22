@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Check, CheckCircle2 } from "lucide-react";
+import { Check, CheckCircle2, Clock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { WalletButton } from "@/features/marketplace/components/WalletButton";
@@ -91,22 +91,22 @@ export function SignupForm({ role }: { role: MarketplaceRole }) {
   const validate = (): Errors => {
     const next: Errors = {};
 
-    if (!form.fullName.trim()) next.fullName = "Enter your full name";
-    if (!form.email.includes("@")) next.email = "Email must include @";
-    if (form.phone.replace(/[^\d]/g, "").length < 7) next.phone = "Enter a valid phone number";
-    if (!form.terms) next.terms = "Please accept the terms to continue";
+    if (!form.fullName.trim()) next.fullName = "Enter your full name.";
+    if (!form.email.includes("@")) next.email = "Enter a valid email address.";
+    if (form.phone.replace(/[^\d]/g, "").length < 7) next.phone = "Enter a valid phone number.";
+    if (!form.terms) next.terms = "Please agree to the Terms of Service and Privacy Policy to continue.";
 
     if (role === "contractor") {
-      if (!form.companyName.trim()) next.companyName = "Enter your company name";
-      if (!form.location) next.location = "Choose where you work";
-      if (form.specialties.length === 0) next.specialties = "Pick at least one";
+      if (!form.companyName.trim()) next.companyName = "Enter your company name.";
+      if (!form.location) next.location = "Select where you work.";
+      if (form.specialties.length === 0) next.specialties = "Select at least one specialty.";
     }
 
     if (role === "inspector") {
-      if (!form.profession) next.profession = "Choose your profession";
-      if (!form.licenseNumber.trim()) next.licenseNumber = "Enter your licence number";
-      if (!form.licensingBody.trim()) next.licensingBody = "Enter the body that issued it";
-      if (form.serviceAreas.length === 0) next.serviceAreas = "Pick at least one area";
+      if (!form.profession) next.profession = "Select your profession.";
+      if (!form.licenseNumber.trim()) next.licenseNumber = "Enter your licence number.";
+      if (!form.licensingBody.trim()) next.licensingBody = "Enter the organization that issued your licence.";
+      if (form.serviceAreas.length === 0) next.serviceAreas = "Select at least one service area.";
     }
 
     return next;
@@ -157,7 +157,9 @@ export function SignupForm({ role }: { role: MarketplaceRole }) {
       setDone(role === "contractor" ? form.companyName.trim() : firstName(form.fullName));
     } catch (err) {
       setSystemError(
-        err instanceof Error ? err.message : "Couldn't create your account. Please try again."
+        err instanceof Error
+          ? err.message
+          : "We couldn't create your account. This email may already be registered. Try logging in or use a different email address."
       );
     } finally {
       setSubmitting(false);
@@ -174,7 +176,7 @@ export function SignupForm({ role }: { role: MarketplaceRole }) {
         <Field
           id="companyName"
           label="Company name"
-          helper="Or your own name, if you work independently."
+          helper="Or your own name if you work independently."
           error={errors.companyName}
         >
           <Input
@@ -228,13 +230,13 @@ export function SignupForm({ role }: { role: MarketplaceRole }) {
                 invalid={Boolean(errors.licenseNumber)}
               />
             </Field>
-            <Field id="licensingBody" label="Issued by" error={errors.licensingBody}>
+            <Field id="licensingBody" label="Licensing body" error={errors.licensingBody}>
               <Input
                 id="licensingBody"
                 value={form.licensingBody}
                 onChange={(v) => set("licensingBody", v)}
                 invalid={Boolean(errors.licensingBody)}
-                placeholder="e.g. Nigerian Institute of Quantity Surveyors"
+                placeholder="The organization that issued your licence"
               />
             </Field>
           </div>
@@ -259,7 +261,7 @@ export function SignupForm({ role }: { role: MarketplaceRole }) {
           // BRIEF-DEVIATION: the brief promises "We'll text a code to confirm
           // it's you." There is no SMS verification, so this says what the
           // number is actually for instead of promising a text that never comes.
-          helper="So your contractor and inspector can reach you."
+          helper={role === "client" ? undefined : "We'll use this to help confirm your account."}
           error={errors.phone}
         >
           <Input
@@ -288,7 +290,7 @@ export function SignupForm({ role }: { role: MarketplaceRole }) {
             <Field
               id="location"
               label="Where do you work?"
-              helper="State or region — clients will see this on your profile."
+              helper="State or region where you work."
               error={errors.location}
             >
               <Select
@@ -318,7 +320,7 @@ export function SignupForm({ role }: { role: MarketplaceRole }) {
         <Field
           id="serviceAreas"
           label="Where can you inspect?"
-          helper="Select the states or regions you can reach."
+          helper="States or regions where you can inspect."
           error={errors.serviceAreas}
         >
           <Chips
@@ -395,10 +397,24 @@ function SuccessScreen({ role, name }: { role: MarketplaceRole; name: string }) 
       </span>
       <h2 className="mt-5 text-headline-md font-semibold text-on-surface">{success.title(name)}</h2>
       <p className="mx-auto mt-3 max-w-md text-body-md text-on-surface-variant">{success.body}</p>
-      <Button asChild size="lg" className="mt-7">
-        <Link href={success.href}>{success.cta}</Link>
-      </Button>
-      <p className="mt-4 text-body-sm text-on-surface-variant">
+
+      {success.status && (
+        <p className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full bg-surface-container px-3.5 py-1.5 text-body-sm text-on-surface-variant">
+          <Clock className="h-4 w-4" aria-hidden />
+          {success.status}
+        </p>
+      )}
+
+      <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+        <Button asChild size="lg">
+          <Link href={success.href}>{success.cta}</Link>
+        </Button>
+        <Button asChild variant="secondary">
+          <Link href={success.secondaryHref}>{success.secondaryCta}</Link>
+        </Button>
+      </div>
+
+      <p className="mt-5 text-body-sm text-on-surface-variant">
         Or{" "}
         <Link href={ROLE_CONTENT[role].path} className="text-primary underline underline-offset-4">
           read how it works

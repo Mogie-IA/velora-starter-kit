@@ -4,9 +4,8 @@ import { LandingPage } from "@/features/site/components/LandingPage";
 import { CLIENT } from "@/features/site/content";
 
 export const metadata: Metadata = {
-  title: "Build back home without losing the money",
-  description:
-    "Velora holds your money in escrow and only pays your contractor once an independent inspector confirms the work — in person, stage by stage.",
+  title: "Build back home, from anywhere",
+  description: CLIENT.hero.body,
 };
 
 export default function ClientsPage() {
