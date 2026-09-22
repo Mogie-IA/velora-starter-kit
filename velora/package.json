@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.14",
@@ -19,6 +20,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-toast": "^1.2.14",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@solana/spl-token": "^0.4.15",
     "@solana/wallet-adapter-backpack": "^0.1.14",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-phantom": "^0.9.24",

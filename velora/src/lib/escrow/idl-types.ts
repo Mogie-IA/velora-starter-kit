@@ -1,0 +1,1527 @@
+/**
+ * Program IDL in camelCase format in order to be used in JS/TS.
+ *
+ * Note that this is only a type helper and is not the actual IDL. The original
+ * IDL can be found at `target/idl/velora_escrow.json`.
+ */
+export type VeloraEscrow = {
+  "address": "7bLsUwEJkbQRaJ7BzEbGhvnCQcZkaHf6K1UFndijyc9P",
+  "metadata": {
+    "name": "velora_escrow",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Milestone escrow for diaspora-funded construction"
+  },
+  "instructions": [
+    {
+      "name": "add_milestone",
+      "docs": [
+        "Define one stage of work and what it pays. Client only, before funding."
+      ],
+      "discriminator": [
+        165,
+        18,
+        177,
+        128,
+        204,
+        172,
+        23,
+        249
+      ],
+      "accounts": [
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "project"
+          ]
+        },
+        {
+          "name": "project",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  106,
+                  101,
+                  99,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "project.client",
+                "account": "Project"
+              },
+              {
+                "kind": "account",
+                "path": "project.project_id",
+                "account": "Project"
+              }
+            ]
+          }
+        },
+        {
+          "name": "milestone",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "index",
+          "type": "u8"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "inspection_fee",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "approve_milestone",
+      "docs": [
+        "Inspector or client signs off. The second of the two triggers payout in",
+        "the same transaction, so funds are never left in a half-approved state."
+      ],
+      "discriminator": [
+        145,
+        85,
+        92,
+        60,
+        50,
+        130,
+        219,
+        106
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "signer": true
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "project",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  106,
+                  101,
+                  99,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "project.client",
+                "account": "Project"
+              },
+              {
+                "kind": "account",
+                "path": "project.project_id",
+                "account": "Project"
+              }
+            ]
+          }
+        },
+        {
+          "name": "milestone",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "project"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "contractor_token_account",
+          "writable": true
+        },
+        {
+          "name": "inspector_token_account",
+          "writable": true
+        },
+        {
+          "name": "treasury_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_project",
+      "docs": [
+        "Client opens a project against a named contractor and inspector."
+      ],
+      "discriminator": [
+        148,
+        219,
+        181,
+        42,
+        221,
+        114,
+        145,
+        190
+      ],
+      "accounts": [
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "contractor"
+        },
+        {
+          "name": "inspector"
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "project",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  106,
+                  101,
+                  99,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "client"
+              },
+              {
+                "kind": "arg",
+                "path": "project_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "docs": [
+            "Vault holding every funded milestone for this project, owned by the",
+            "project PDA rather than by any person."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "project"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "project_id",
+          "type": "u64"
+        },
+        {
+          "name": "milestone_count",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "fund_milestone",
+      "docs": [
+        "Client moves money in. The protocol fee is taken here, on top of the",
+        "escrowed amount, and goes straight to the treasury \u2014 it never enters",
+        "the vault, so it can never be confused with the contractor's money."
+      ],
+      "discriminator": [
+        104,
+        130,
+        72,
+        76,
+        84,
+        58,
+        37,
+        181
+      ],
+      "accounts": [
+        {
+          "name": "client",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "project"
+          ]
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "project",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  106,
+                  101,
+                  99,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "project.client",
+                "account": "Project"
+              },
+              {
+                "kind": "account",
+                "path": "project.project_id",
+                "account": "Project"
+              }
+            ]
+          }
+        },
+        {
+          "name": "milestone",
+          "writable": true
+        },
+        {
+          "name": "client_token_account",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "project"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "treasury_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_config",
+      "docs": [
+        "One-time protocol setup. Sets the treasury and the three fee rates."
+      ],
+      "discriminator": [
+        208,
+        127,
+        21,
+        1,
+        194,
+        190,
+        196,
+        70
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "treasury"
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "client_fee_bps",
+          "type": "u16"
+        },
+        {
+          "name": "contractor_fee_bps",
+          "type": "u16"
+        },
+        {
+          "name": "inspector_fee_bps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "refund_milestone",
+      "docs": [
+        "Client pulls funding back \u2014 only before the contractor has submitted",
+        "work, so a contractor can never lose money for work already delivered."
+      ],
+      "discriminator": [
+        44,
+        76,
+        207,
+        19,
+        181,
+        170,
+        85,
+        176
+      ],
+      "accounts": [
+        {
+          "name": "client",
+          "signer": true
+        },
+        {
+          "name": "project",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  106,
+                  101,
+                  99,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "project.client",
+                "account": "Project"
+              },
+              {
+                "kind": "account",
+                "path": "project.project_id",
+                "account": "Project"
+              }
+            ]
+          }
+        },
+        {
+          "name": "milestone",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "project"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "client_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "submit_milestone",
+      "docs": [
+        "Contractor marks a stage complete and attaches proof."
+      ],
+      "discriminator": [
+        35,
+        96,
+        220,
+        215,
+        102,
+        83,
+        139,
+        52
+      ],
+      "accounts": [
+        {
+          "name": "contractor",
+          "signer": true
+        },
+        {
+          "name": "project",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  106,
+                  101,
+                  99,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "project.client",
+                "account": "Project"
+              },
+              {
+                "kind": "account",
+                "path": "project.project_id",
+                "account": "Project"
+              }
+            ]
+          }
+        },
+        {
+          "name": "milestone",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "evidence_uri",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "update_fees",
+      "docs": [
+        "Adjust fee rates. Deliberately cannot touch any escrowed funds."
+      ],
+      "discriminator": [
+        225,
+        27,
+        13,
+        6,
+        69,
+        84,
+        172,
+        191
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true,
+          "relations": [
+            "config"
+          ]
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "client_fee_bps",
+          "type": "u16"
+        },
+        {
+          "name": "contractor_fee_bps",
+          "type": "u16"
+        },
+        {
+          "name": "inspector_fee_bps",
+          "type": "u16"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Config",
+      "discriminator": [
+        155,
+        12,
+        170,
+        224,
+        30,
+        250,
+        204,
+        130
+      ]
+    },
+    {
+      "name": "Milestone",
+      "discriminator": [
+        38,
+        210,
+        239,
+        177,
+        85,
+        184,
+        10,
+        44
+      ]
+    },
+    {
+      "name": "Project",
+      "discriminator": [
+        205,
+        168,
+        189,
+        202,
+        181,
+        247,
+        142,
+        19
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "MilestoneApproved",
+      "discriminator": [
+        40,
+        109,
+        159,
+        144,
+        169,
+        230,
+        35,
+        229
+      ]
+    },
+    {
+      "name": "MilestoneFunded",
+      "discriminator": [
+        133,
+        223,
+        85,
+        235,
+        56,
+        36,
+        238,
+        240
+      ]
+    },
+    {
+      "name": "MilestoneRefunded",
+      "discriminator": [
+        44,
+        160,
+        228,
+        6,
+        82,
+        43,
+        123,
+        85
+      ]
+    },
+    {
+      "name": "MilestoneReleased",
+      "discriminator": [
+        49,
+        225,
+        91,
+        223,
+        34,
+        165,
+        109,
+        181
+      ]
+    },
+    {
+      "name": "MilestoneSubmitted",
+      "discriminator": [
+        242,
+        19,
+        75,
+        99,
+        12,
+        28,
+        19,
+        33
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "FeeTooHigh",
+      "msg": "Fee rate cannot exceed 10% (1000 bps)"
+    },
+    {
+      "code": 6001,
+      "name": "ProjectNotActive",
+      "msg": "Project is not active"
+    },
+    {
+      "code": 6002,
+      "name": "MilestoneIndexOutOfRange",
+      "msg": "Milestone index is outside this project's range"
+    },
+    {
+      "code": 6003,
+      "name": "ZeroAmount",
+      "msg": "Milestone amount must be greater than zero"
+    },
+    {
+      "code": 6004,
+      "name": "MilestoneNotFunded",
+      "msg": "Milestone must be funded before work can be submitted"
+    },
+    {
+      "code": 6005,
+      "name": "MilestoneNotSubmitted",
+      "msg": "Milestone must be submitted before it can be approved"
+    },
+    {
+      "code": 6006,
+      "name": "MilestoneAlreadyFunded",
+      "msg": "Milestone has already been funded"
+    },
+    {
+      "code": 6007,
+      "name": "MilestoneClosed",
+      "msg": "Milestone has already been released or refunded"
+    },
+    {
+      "code": 6008,
+      "name": "NotAnApprover",
+      "msg": "Only the assigned inspector or the client may approve a milestone"
+    },
+    {
+      "code": 6009,
+      "name": "AlreadyApproved",
+      "msg": "This party has already approved the milestone"
+    },
+    {
+      "code": 6010,
+      "name": "RefundNotAllowed",
+      "msg": "Funds can only be refunded before the contractor submits work"
+    },
+    {
+      "code": 6011,
+      "name": "EvidenceUriTooLong",
+      "msg": "Evidence URI exceeds the maximum length"
+    },
+    {
+      "code": 6012,
+      "name": "MathOverflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6013,
+      "name": "TokenAccountOwnerMismatch",
+      "msg": "Token account owner does not match the expected party"
+    },
+    {
+      "code": 6014,
+      "name": "MintMismatch",
+      "msg": "Token account mint does not match the project mint"
+    }
+  ],
+  "types": [
+    {
+      "name": "Config",
+      "docs": [
+        "Global protocol configuration. Fee rates live here so they can be tuned",
+        "without redeploying the program.",
+        "",
+        "Note what this account deliberately does NOT allow: the `authority` can",
+        "change fee rates, but has no instruction anywhere in this program that lets",
+        "it move escrowed funds. Escrow can only ever move via `approve_milestone`",
+        "(requiring both the inspector and the client) or `refund_milestone`",
+        "(returning funds to the client). That is the core trust guarantee."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "Admin allowed to update fee rates and rotate the treasury."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "treasury",
+            "docs": [
+              "Destination for all protocol fees."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "client_fee_bps",
+            "docs": [
+              "Charged to the client on top of what they fund. 300 = 3.00%."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "contractor_fee_bps",
+            "docs": [
+              "Deducted from the contractor's payout at release. 100 = 1.00%."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "inspector_fee_bps",
+            "docs": [
+              "Deducted from the inspector's payout at release. 100 = 1.00%."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Milestone",
+      "docs": [
+        "A single stage of work (foundation, roofing, ...) and the money behind it."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "project",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "docs": [
+              "Gross amount owed to the contractor, before the contractor fee."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "inspection_fee",
+            "docs": [
+              "Gross amount owed to the inspector, before the inspector fee."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "MilestoneStatus"
+              }
+            }
+          },
+          {
+            "name": "inspector_approved",
+            "docs": [
+              "Set by the inspector after a site visit."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "client_approved",
+            "docs": [
+              "Set by the client after reviewing the evidence."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "evidence_uri",
+            "docs": [
+              "Where the contractor's photo/video proof lives."
+            ],
+            "type": "string"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneApproved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "project",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "by",
+            "type": "pubkey"
+          },
+          {
+            "name": "inspector_approved",
+            "type": "bool"
+          },
+          {
+            "name": "client_approved",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneFunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "project",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "escrowed",
+            "type": "u64"
+          },
+          {
+            "name": "client_fee",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneRefunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "project",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneReleased",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "project",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "contractor_net",
+            "type": "u64"
+          },
+          {
+            "name": "inspector_net",
+            "type": "u64"
+          },
+          {
+            "name": "protocol_cut",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Funded"
+          },
+          {
+            "name": "Submitted"
+          },
+          {
+            "name": "Released"
+          },
+          {
+            "name": "Refunded"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "project",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Project",
+      "docs": [
+        "One construction job between a client, a contractor and an inspector."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "client",
+            "docs": [
+              "Diaspora payer funding the build."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "contractor",
+            "docs": [
+              "Builder receiving milestone payouts."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "inspector",
+            "docs": [
+              "Independent surveyor who verifies work on site."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "docs": [
+              "SPL mint used for the whole project (USDC in production)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "project_id",
+            "docs": [
+              "Client-scoped nonce, lets one client run many projects."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "milestone_count",
+            "docs": [
+              "How many milestones this project was created with."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "milestones_released",
+            "docs": [
+              "How many have fully paid out."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "total_escrowed",
+            "docs": [
+              "Sum currently sitting in the vault across all funded milestones."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "ProjectStatus"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProjectStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Completed"
+          },
+          {
+            "name": "Cancelled"
+          }
+        ]
+      }
+    }
+  ]
+};
