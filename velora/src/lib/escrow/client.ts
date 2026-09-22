@@ -2,6 +2,7 @@ import { AnchorProvider, BN, Program, type Idl } from "@coral-xyz/anchor";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
+  createAssociatedTokenAccountIdempotentInstruction,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import { Connection, PublicKey, SystemProgram, type Transaction } from "@solana/web3.js";
@@ -79,6 +80,20 @@ export function vaultAta(project: PublicKey, mint = USDC_MINT): PublicKey {
 
 export function userAta(owner: PublicKey, mint = USDC_MINT): PublicKey {
   return getAssociatedTokenAddressSync(mint, owner, false);
+}
+
+/**
+ * Creates `owner`'s USDC account if it does not exist yet, and does nothing if
+ * it does. A contractor or inspector who has never held USDC has no token
+ * account, and the payout would fail without this.
+ */
+function ensureAta(payer: PublicKey, owner: PublicKey, mint: PublicKey) {
+  return createAssociatedTokenAccountIdempotentInstruction(
+    payer,
+    userAta(owner, mint),
+    owner,
+    mint
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -179,6 +194,7 @@ export async function fundMilestoneTx(program: Program<Idl>, args: FundMilestone
       mint,
       tokenProgram: TOKEN_PROGRAM_ID,
     })
+    .preInstructions([ensureAta(args.client, args.treasury, mint)])
     .transaction();
 }
 
@@ -237,6 +253,11 @@ export async function approveMilestoneTx(program: Program<Idl>, args: ApproveMil
       mint,
       tokenProgram: TOKEN_PROGRAM_ID,
     })
+    .preInstructions([
+      ensureAta(args.signer, args.contractor, mint),
+      ensureAta(args.signer, args.inspector, mint),
+      ensureAta(args.signer, args.treasury, mint),
+    ])
     .transaction();
 }
 
