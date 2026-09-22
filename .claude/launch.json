@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "velora",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "velora", "dev", "--port", "3000"],
+      "port": 3000
+    }
+  ]
+}

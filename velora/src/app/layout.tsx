@@ -4,12 +4,19 @@ import "@/styles/globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Velora — Wallet-Native Commerce on Solana",
+    default: "Velora — Escrow-backed construction payments, verified in person",
     template: "%s | Velora",
   },
   description:
-    "Velora is a wallet-native commerce platform for Solana. Accept payments, manage subscriptions, and build commerce flows — entirely on-chain.",
-  keywords: ["Solana", "Web3", "payments", "subscriptions", "blockchain", "commerce"],
+    "Velora holds your money in escrow and only pays your contractor once an independent inspector confirms the work — in person, stage by stage, no matter where you live.",
+  keywords: [
+    "construction escrow",
+    "diaspora",
+    "milestone payments",
+    "site inspection",
+    "Solana",
+    "USDC",
+  ],
   authors: [{ name: "Velora" }],
   robots: { index: false, follow: false },
 };

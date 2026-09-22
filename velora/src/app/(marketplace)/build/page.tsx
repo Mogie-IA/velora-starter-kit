@@ -1,198 +1,207 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Hammer, HardHat, Home, Lock, ShieldCheck } from "lucide-react";
+import { ArrowRight, Hammer, Home, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { saveProfile } from "@/app/actions/marketplace";
-import { useWalletProof } from "@/features/marketplace/useWalletProof";
-import type { MarketplaceRole } from "@/types/marketplace";
+import { WalletButton } from "@/features/marketplace/components/WalletButton";
+import { getMyProfiles, getMyProjects } from "@/app/actions/marketplace";
+import type {
+  ConstructionProject,
+  MarketplaceProfile,
+  MarketplaceRole,
+} from "@/types/marketplace";
 
-const ROLES: Array<{
-  role: MarketplaceRole;
-  title: string;
-  blurb: string;
-  icon: typeof Home;
-}> = [
-  {
-    role: "client",
-    title: "I'm building",
-    blurb:
-      "Fund a build back home stage by stage. Money only moves when the work is verified.",
+/**
+ * The signed-in hub.
+ *
+ * Sign-up lives on the marketing site now, so this page no longer asks who you
+ * are — it reads the roles already on your wallet and shows the next useful
+ * action for each. Holding more than one role is normal: a contractor in Lagos
+ * may also be funding their own build.
+ */
+
+const ROLE_UI: Record<
+  MarketplaceRole,
+  { icon: typeof Home; title: string; actions: Array<{ label: string; href: string }> }
+> = {
+  client: {
     icon: Home,
+    title: "Building",
+    actions: [
+      { label: "Post a build", href: "/build/jobs/new" },
+      { label: "Browse contractors", href: "/build/contractors" },
+      { label: "Browse inspectors", href: "/build/inspectors" },
+    ],
   },
-  {
-    role: "contractor",
-    title: "I build",
-    blurb: "Bid on jobs and get paid automatically the moment a stage is approved.",
+  contractor: {
     icon: Hammer,
+    title: "Contracting",
+    actions: [{ label: "Find open jobs", href: "/build/jobs" }],
   },
-  {
-    role: "inspector",
-    title: "I inspect",
-    blurb:
-      "Verify work on site as an independent surveyor or engineer, and get paid per visit.",
+  inspector: {
     icon: ShieldCheck,
+    title: "Inspecting",
+    actions: [{ label: "Find jobs to inspect", href: "/build/jobs" }],
   },
-];
+};
+
+const usd = (n: number) =>
+  n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
 export default function BuildHomePage() {
-  const { connected } = useWallet();
-  const { createProof } = useWalletProof();
-  const [saving, setSaving] = useState<MarketplaceRole | null>(null);
-  const [done, setDone] = useState<MarketplaceRole | null>(null);
-  const [name, setName] = useState("");
-  const [city, setCity] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const { publicKey, connected } = useWallet();
+  const [profiles, setProfiles] = useState<MarketplaceProfile[]>([]);
+  const [projects, setProjects] = useState<ConstructionProject[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const join = async (role: MarketplaceRole) => {
-    setSaving(role);
-    setError(null);
-    try {
-      const res = await saveProfile(await createProof("save-profile"), role, {
-        displayName: name.trim() || "Unnamed",
-        city: city.trim() || null,
-        country: "NG",
-      });
-      if (!res.ok) setError(res.error);
-      else setDone(role);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save your profile");
-    } finally {
-      setSaving(null);
+  useEffect(() => {
+    const wallet = publicKey?.toBase58();
+    if (!wallet) {
+      setLoading(false);
+      return;
     }
-  };
+    setLoading(true);
+    void Promise.all([getMyProfiles(wallet), getMyProjects(wallet)]).then(([p, pr]) => {
+      if (p.ok) setProfiles(p.data);
+      if (pr.ok) setProjects(pr.data);
+      setLoading(false);
+    });
+  }, [publicKey]);
+
+  if (!connected) {
+    return (
+      <div className="mx-auto w-full max-w-md px-4 py-24 text-center sm:px-6">
+        <h1 className="text-headline-md font-semibold text-on-surface">Log in to Velora</h1>
+        <p className="mt-3 text-body-md text-on-surface-variant">
+          Your wallet is your account. Connect it to see your projects — signing in cannot move any
+          money.
+        </p>
+        <div className="mt-7 flex justify-center">
+          <WalletButton />
+        </div>
+        <p className="mt-6 text-body-sm text-on-surface-variant">
+          New here?{" "}
+          <Link href="/signup" className="font-medium text-primary underline underline-offset-4">
+            Create an account
+          </Link>
+        </p>
+      </div>
+    );
+  }
+
+  const roles = profiles.map((p) => p.role);
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6">
-      <section className="max-w-2xl">
-        <h1 className="text-headline-lg font-semibold text-on-surface">
-          Build back home without losing the money.
-        </h1>
-        <p className="mt-3 text-body-lg text-on-surface-variant">
-          Pay your contractor stage by stage. Each payment is held in escrow and released only
-          when an independent inspector confirms the work is actually done — and you agree.
-        </p>
+      <h1 className="text-headline-lg font-semibold tracking-tight text-on-surface">
+        {profiles[0] ? `Welcome back, ${firstName(profiles[0].displayName)}.` : "Welcome to Velora."}
+      </h1>
+      <p className="mt-2 text-body-md text-on-surface-variant">
+        Everything you&apos;re building, inspecting, or paying for.
+      </p>
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Button asChild>
-            <Link href="/build/jobs/new">Post a build</Link>
-          </Button>
-          <Button asChild variant="secondary">
-            <Link href="/build/jobs">Find work</Link>
-          </Button>
-        </div>
-      </section>
+      {loading && <p className="mt-10 text-body-md text-on-surface-variant">Loading…</p>}
 
-      <section className="mt-12 grid gap-3 sm:grid-cols-3">
-        <HowItWorks
-          icon={<Lock className="h-5 w-5" aria-hidden />}
-          title="Money is locked, not sent"
-          body="Funds sit in a vault owned by the project itself. Velora cannot move them either."
-        />
-        <HowItWorks
-          icon={<HardHat className="h-5 w-5" aria-hidden />}
-          title="Work is verified on site"
-          body="A qualified inspector visits and confirms each stage before anything is released."
-        />
-        <HowItWorks
-          icon={<ShieldCheck className="h-5 w-5" aria-hidden />}
-          title="Two approvals, always"
-          body="The inspector and you both sign off. One approval alone releases nothing."
-        />
-      </section>
-
-      <section className="mt-14">
-        <h2 className="text-title-lg font-semibold text-on-surface">Join as</h2>
-        <p className="mt-1 text-body-md text-on-surface-variant">
-          You can hold more than one role — build for others and fund your own project.
-        </p>
-
-        {connected && (
-          <div className="mt-5 grid max-w-lg gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label htmlFor="name" className="text-label-md font-medium text-on-surface">
-                Your name
-              </label>
-              <input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={inputClass}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label htmlFor="city" className="text-label-md font-medium text-on-surface">
-                City
-              </label>
-              <input
-                id="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Lagos"
-                className={inputClass}
-              />
-            </div>
-          </div>
-        )}
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          {ROLES.map(({ role, title, blurb, icon: Icon }) => (
-            <div
-              key={role}
-              className="rounded-[20px] border border-outline-variant bg-surface-container-lowest p-5"
-            >
-              <Icon className="h-6 w-6 text-primary" aria-hidden />
-              <h3 className="mt-3 text-title-sm font-semibold text-on-surface">{title}</h3>
-              <p className="mt-1 text-body-sm text-on-surface-variant">{blurb}</p>
-              <Button
-                className="mt-4 w-full"
-                size="sm"
-                variant={done === role ? "secondary" : "primary"}
-                onClick={() => join(role)}
-                disabled={!connected || saving !== null}
-              >
-                {!connected
-                  ? "Connect wallet"
-                  : done === role
-                    ? "Joined"
-                    : saving === role
-                      ? "Saving…"
-                      : "Join"}
-              </Button>
-            </div>
-          ))}
-        </div>
-
-        {error && (
-          <p role="alert" className="mt-4 text-body-sm text-error">
-            {error}
+      {!loading && roles.length === 0 && (
+        <div className="mt-8 rounded-card border border-outline-variant bg-surface-container-lowest p-8">
+          <h2 className="text-title-md font-semibold text-on-surface">
+            This wallet has no Velora profile yet
+          </h2>
+          <p className="mt-2 max-w-lg text-body-md text-on-surface-variant">
+            Pick how you&apos;ll use Velora and we&apos;ll set up your profile — it takes a minute.
           </p>
-        )}
-      </section>
+          <Button asChild className="mt-6">
+            <Link href="/signup">Create my account</Link>
+          </Button>
+        </div>
+      )}
+
+      {!loading && roles.length > 0 && (
+        <section className="mt-8 grid gap-3 sm:grid-cols-3">
+          {profiles.map((profile) => {
+            const ui = ROLE_UI[profile.role];
+            const Icon = ui.icon;
+            return (
+              <div
+                key={profile.id}
+                className="rounded-card border border-outline-variant bg-surface-container-lowest p-5 shadow-surface"
+              >
+                <span className="grid h-10 w-10 place-items-center rounded-[12px] bg-primary-fixed text-primary">
+                  <Icon className="h-5 w-5" aria-hidden />
+                </span>
+                <h2 className="mt-4 text-title-sm font-semibold text-on-surface">{ui.title}</h2>
+                <ul className="mt-3 space-y-1.5">
+                  {ui.actions.map((action) => (
+                    <li key={action.href + action.label}>
+                      <Link
+                        href={action.href}
+                        className="inline-flex items-center gap-1.5 text-body-sm font-medium text-primary underline-offset-4 hover:underline"
+                      >
+                        {action.label}
+                        <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </section>
+      )}
+
+      {!loading && (
+        <section className="mt-12">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-title-lg font-semibold text-on-surface">Your projects</h2>
+            {projects.length > 0 && (
+              <Link
+                href="/build/projects"
+                className="text-body-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                See all
+              </Link>
+            )}
+          </div>
+
+          {projects.length === 0 ? (
+            <p className="mt-4 rounded-card border border-dashed border-outline-variant p-8 text-center text-body-md text-on-surface-variant">
+              Nothing under way yet.{" "}
+              <Link href="/build/jobs" className="text-primary underline underline-offset-4">
+                Browse open builds
+              </Link>{" "}
+              or post one.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {projects.slice(0, 4).map((p) => (
+                <li key={p.id}>
+                  <Link
+                    href={`/build/projects/${p.id}`}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-outline-variant bg-surface-container-lowest p-5 transition-colors hover:border-primary/40"
+                  >
+                    <div>
+                      <p className="text-title-sm font-semibold text-on-surface">{p.title}</p>
+                      <p className="mt-0.5 text-body-sm text-on-surface-variant">
+                        {p.locationCity}
+                      </p>
+                    </div>
+                    <p className="text-title-sm font-semibold tabular-nums text-on-surface">
+                      {usd(p.totalAmountUsd)}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </div>
   );
 }
 
-const inputClass =
-  "h-12 w-full rounded-[12px] border border-outline-variant bg-surface-container-lowest px-3 text-body-md text-on-surface outline-none placeholder:text-outline focus-visible:ring-2 focus-visible:ring-primary";
-
-function HowItWorks({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="rounded-[20px] border border-outline-variant bg-surface-container-low p-5">
-      <span className="text-primary">{icon}</span>
-      <h3 className="mt-3 text-title-sm font-semibold text-on-surface">{title}</h3>
-      <p className="mt-1 text-body-sm text-on-surface-variant">{body}</p>
-    </div>
-  );
+function firstName(full: string): string {
+  return full.trim().split(/\s+/)[0] || full.trim();
 }

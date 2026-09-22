@@ -8,16 +8,18 @@ export default function MarketplaceLayout({ children }: { children: ReactNode })
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-outline-variant bg-background/80 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
-          <Link href="/build" className="flex items-center gap-2">
+          <Link href="/build" className="flex shrink-0 items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-primary text-on-primary font-semibold">
               V
             </span>
-            <span className="text-title-sm font-semibold text-on-surface">Velora Build</span>
+            <span className="text-title-sm font-semibold text-on-surface">Velora</span>
           </Link>
 
-          <nav className="ml-2 hidden gap-1 sm:flex">
-            <NavLink href="/build/jobs">Find work</NavLink>
+          <nav className="ml-2 hidden gap-1 md:flex">
+            <NavLink href="/build/jobs">Jobs</NavLink>
             <NavLink href="/build/projects">My projects</NavLink>
+            <NavLink href="/build/contractors">Contractors</NavLink>
+            <NavLink href="/build/inspectors">Inspectors</NavLink>
           </nav>
 
           <div className="ml-auto">
